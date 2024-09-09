@@ -10,7 +10,9 @@ gaussian = (o*np.sqrt(2*np.pi))**(-1)*np.exp(-0.5*((x-u)/o)**2)
 
 plt.plot(x,gaussian)
 plt.xlabel("x")
-plt.ylabel("y")
+plt.ylabel("f(x)")
 plt.title("Normalized Gaussian Distribution")
+plt.text(-8, 0.11, '$\\sigma = 3$')
+plt.text(-8, 0.10, '$\\mu = 0$')
 
 plt.savefig('guassian.png')
