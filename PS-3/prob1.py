@@ -1,51 +1,29 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from time import time
+N = 100
+steps = int(N/10)
 
-N_max = 100
-steps = int(N_max/10)
+A = np.random.rand([N,N],float)
+B = np.random.rand([N,N],float)
+C = np.random.rand([N,N],float)
 
 def matrixx(N):
-    opx = 0
-    A = np.ones([N,N],float)
-    B = np.ones([N,N],float)
-    C = np.zeros([N,N],float)
+    F = np.zeros((N,N))
     for i in range(N):
         for j in range(N):
             for k in range(N):
-                C[i,j] += A[i,k]*B[k,j]
-                opx += 1
-    return opx
-
-def scalingx():
-    i = 0
-    opscalex = np.zeros((steps,2))
-    for N in range(0,N_max,steps):
-        opscalex[i] = [N,matrixx(N)]
-        i += 1
-    return opscalex
-calcx = np.array(scalingx())
+                F[i,j] += A[i,k]*B[k,j]
+    return F
+timex = time.time(matrixx(N))
+print(timex)
 
 
-def matrixdot(N):
-    opdot = 0
-    A = np.ones([N, N], float)
-    B = np.ones([N, N], float)
-    C = np.zeros([N, N], float)
-    for i in range(N):
-        for j in range(N):
-            for k in range(N):
-                C[i, j] += A[i, k] * B[k, j]
-                opdot += 1
-    return opdot
+#make matrices random
 
-def scalingdot():
-    i = 0
-    opscaledot = np.zeros((steps, 2))
-    for N in range(0, N_max, steps):
-        opscaledot[i] = [N, matrixdot(N)]
-        i += 1
-    return opscaledot
-calcdot = np.array(scalingdot())
+D = np.dot(A,B)
+
+timedot = time.time(matrixdot(N))
 
 
 
