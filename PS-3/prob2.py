@@ -50,14 +50,13 @@ Bi_Tl = decay_process(tau_Bi213,isocount[t-1,0],[t-1,1])
 def isodecays(): 
     isocount[0,0] = Bi213
     isochange = np.zeros((int(t_max/deltat),4),dtype=int)
-
     for t in tpoints:
-        isochange[t,:] = (Bi213_decay()[0]+Bi213_decay()[1], #change in Bi213 atoms.
-                        Bi213_decay()[1]+Tl_Pb[0], #change in Ti209 atoms.
-                        Bi213_decay()[1]+Tl_Pb[1]+Pb_Bi[0] #change in Pb209 atoms.
+        Bi213_decay()
+        isochange[t,:] = (Bi213_decay[0]+Bi213_decay[1], #change in Bi213 atoms.
+                        Bi213_decay[1]+Tl_Pb[0], #change in Ti209 atoms.
+                        Bi213_decay[1]+Tl_Pb[1]+Pb_Bi[0] #change in Pb209 atoms.
                         Pb_Bi[1]) #change in Bi209 atoms.
         isocount[t,:] = isocount[t-1,:] + isochange[t,:]
-    
     return isocount
 
 
