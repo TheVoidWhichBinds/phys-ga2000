@@ -5,7 +5,6 @@ import time
 
 
 def matrixx(N,A,B):
-def matrixx(N,A,B):
     F = np.zeros((N,N))
     startx = time.perf_counter()
     for i in range(N):
@@ -54,7 +53,7 @@ calcdot.set_ylim(0, max(timedot_avg) * 1.1)
 # Add legends
 
 calcx.legend(loc='upper left')
-calcdot.legend(loc='middle left')
+calcdot.legend(loc='upper right')
 
 plt.title('Matrix Multiplication Calculation Load', fontsize=17)
 plt.savefig('Matrices')

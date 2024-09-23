@@ -29,39 +29,43 @@ def decay_process(tau,parent):
     daughtergain = decay
     return parentloss, daughtergain
 
-
 def Bi213_decay():
     if random()<0.9791:
-        Bi_Pb = True
-        Bi_Tl = False
+        return 1,0
     else:
-        Bi_Pb = False
-        Bi_Tl = True
-    return Bi_Pb, Bi_Tl
+        return 0,1
+    
 
+#initialization of 2D array which keeps track of isotope number (columns) vs time (rows)
 isocount = np.zeros((int(t_max/deltat),4),dtype=int)
+isocount[0,0] = Bi213
+isocount[0,1] = Tl209
+isocount[0,2] = Pb209 
+isocount[0,3] = Bi209
 
-Pb_Bi = decay_process(tau_Pb209,isocount[t-1,2],[t-1,3])
-Tl_Pb = decay_process(tau_Tl209,isocount[t-1,1],[t-1,2])
-Bi_Pb = decay_process(tau_Bi213,isocount[t-1,0],[t-1,2])
-Bi_Tl = decay_process(tau_Bi213,isocount[t-1,0],[t-1,1])
+
 
 #calls decay_process with global count of each isotope. I need the input 
 def isodecays(): 
-    isocount[0,0] = Bi213
     isochange = np.zeros((int(t_max/deltat),4),dtype=int)
-    for t in tpoints:
-        Bi213_decay()
-        isochange[t,:] = (Bi213_decay[0]+Bi213_decay[1], #change in Bi213 atoms.
-                        Bi213_decay[1]+Tl_Pb[0], #change in Ti209 atoms.
-                        Bi213_decay[1]+Tl_Pb[1]+Pb_Bi[0] #change in Pb209 atoms.
-                        Pb_Bi[1]) #change in Bi209 atoms.
+    for t in range(1,len(tpoints)):
+        Pbpath,Tlpath = Bi213_decay()
+        Bi_Tl = decay_process(tau_Bi213,isocount[t-1,0])
+        Bi_Pb = decay_process(tau_Bi213,isocount[t-1,0])
+        Tl_Pb = decay_process(tau_Tl209,isocount[t-1,1])
+        Pb_Bi = decay_process(tau_Pb209,isocount[t-1,2])
+        
+        isochange[t,:] = (Pbpath*Bi_Pb[0] + Tlpath*Bi_Tl[0], Tlpath*Bi_Tl[1] + Tl_Pb[0], Pbpath*Bi_Pb[1] + Tl_Pb[1] + Pb_Bi[0], Pb_Bi[1])
         isocount[t,:] = isocount[t-1,:] + isochange[t,:]
     return isocount
 
+isocount = isodecays()
 
-        
-
+plt.plot(tpoints,isocount[:,0],label = 'B213')
+plt.plot(tpoints,isocount[:,1],label = 'B213')
+plt.plot(tpoints,isocount[:,2],label = 'B213')
+plt.plot(tpoints,isocount[:,3],label = 'B213')
+plt.savefig('isocount')
 
 
     
