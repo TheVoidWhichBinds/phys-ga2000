@@ -1,49 +1,60 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+import time
 
 
 def matrixx(N,A,B):
+def matrixx(N,A,B):
     F = np.zeros((N,N))
-    startx = time.time()
+    startx = time.perf_counter()
     for i in range(N):
         for j in range(N):
             for k in range(N):
                 F[i,j] += A[i,k]*B[k,j]
-    endx = time.time()
+    endx = time.perf_counter()
     return (endx - startx)
 
 def matrixdot(N,A,B):
-    startdot = time.time()
+    startdot = time.perf_counter()
     D = np.dot(A,B)
-    enddot = time.time()
+    enddot = time.perf_counter()
     return (enddot - startdot)
 
 
-N_max = 600
-steps = int(N_max/10)
+N_max = 100
+steps = int(N_max/20)
 matrix_sizes = np.arange(10,N_max,steps)
-timex = np.zeros(len(matrix_sizes))
-timedot = np.zeros(len(matrix_sizes))
-
+timex_avg = np.zeros(len(matrix_sizes))
+timedot_avg = np.zeros(len(matrix_sizes))
+iavg = 1
 for i,N in enumerate(matrix_sizes):
     A = np.random.rand(N,N)
     B = np.random.rand(N,N)
     C = np.random.rand(N,N)
-    timex[i] = matrixx(N,A,B)
-    timedot[i] = matrixdot(N,A,B)
+    timex = 0
+    timedot = 0
+    for a in range(iavg):
+        timex += matrixx(N,A,B)
+        timedot += matrixdot(N,A,B)
+    timex_avg[i] = timex/iavg
+    timedot_avg[i] = timedot/iavg
 
+fig, calcx = plt.subplots()
+calcx.scatter(matrix_sizes, timex_avg, color='b', marker='o', label='For-Loop Product')
+calcx.set_xlabel('Square Matrix Dimension N', fontsize=14)
+calcx.set_ylabel('Calculation Time (seconds)', fontsize=10)
+calcx.set_ylim(0, max(timex_avg) * 1.1) 
 
-plt.scatter(matrix_sizes,timex,color='b',marker='o')
-#plt.scatter(matrix_sizes,timedot,color='g',marker='o')
+# Create a second y-axis
+calcdot = calcx.twinx()  # Instantiate a second axes that shares the same x-axis
+calcdot.scatter(matrix_sizes, timedot_avg, color='g', marker='o', label='NumPy Dot Product')
+calcdot.set_ylim(0, max(timedot_avg) * 1.1) 
 
-n = np.linspace(10,N_max,steps)
-y = n**3
-plt.plot(n,y,color='r')
+# Add legends
 
+calcx.legend(loc='upper left')
+calcdot.legend(loc='middle left')
 
-plt.title('Matrix Multiplication Calculation Load', fontsize=19)
-plt.xlabel('Square Matrix Dimension N', fontsize=14)
-plt.ylabel('Total Calculations', fontsize=14)
-#plt.legend()
-plt.show()
+plt.title('Matrix Multiplication Calculation Load', fontsize=17)
+plt.savefig('Matrices')

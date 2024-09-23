@@ -8,7 +8,7 @@ s = 1000
 x_i = np.random
 
 def y_variate(N):
-    x_i = rng.exponential(N,s)
+    x_i = np.exponential(N,s)
     y = 0
     for i in range(N):
         y_i = (1/N)*(x_i)

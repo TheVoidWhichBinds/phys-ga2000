@@ -3,7 +3,7 @@ import numpy as np
 import quadratic
 
 
-def test_quadratic():
+def test_quadratic(quadratic()):
     # Check the case from the problem
     x1, x2 = quadratic.quadratic(a=0.001, b=1000., c=0.001)
     assert (np.abs(x1 - (- 1.e-6)) < 1.e-10)
