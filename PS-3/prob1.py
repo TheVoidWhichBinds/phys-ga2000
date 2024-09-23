@@ -1,42 +1,49 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from time import time
-N = 100
-steps = int(N/10)
+import time
 
-A = np.random.rand([N,N],float)
-B = np.random.rand([N,N],float)
-C = np.random.rand([N,N],float)
 
-def matrixx(N):
+def matrixx(N,A,B):
     F = np.zeros((N,N))
+    startx = time.time()
     for i in range(N):
         for j in range(N):
             for k in range(N):
                 F[i,j] += A[i,k]*B[k,j]
-    return F
-timex = time.time(matrixx(N))
-print(timex)
+    endx = time.time()
+    return (endx - startx)
+
+def matrixdot(N,A,B):
+    startdot = time.time()
+    D = np.dot(A,B)
+    enddot = time.time()
+    return (enddot - startdot)
 
 
-#make matrices random
+N_max = 600
+steps = int(N_max/10)
+matrix_sizes = np.arange(10,N_max,steps)
+timex = np.zeros(len(matrix_sizes))
+timedot = np.zeros(len(matrix_sizes))
 
-D = np.dot(A,B)
+for i,N in enumerate(matrix_sizes):
+    A = np.random.rand(N,N)
+    B = np.random.rand(N,N)
+    C = np.random.rand(N,N)
+    timex[i] = matrixx(N,A,B)
+    timedot[i] = matrixdot(N,A,B)
 
-timedot = time.time(matrixdot(N))
 
+plt.scatter(matrix_sizes,timex,color='b',marker='o')
+#plt.scatter(matrix_sizes,timedot,color='g',marker='o')
 
-
-
-plt.figure(figsize=(9,9))
-plt.scatter(calcx[:,0],calcx[:,1],color='b',marker='o')
-n = np.linspace(min(calcx[:, 0]), max(calcx[:, 0]),500)
+n = np.linspace(10,N_max,steps)
 y = n**3
 plt.plot(n,y,color='r')
-plt.scatter(calcdot[:,0],calcdot[:,1],color='g',marker='o')
+
+
 plt.title('Matrix Multiplication Calculation Load', fontsize=19)
 plt.xlabel('Square Matrix Dimension N', fontsize=14)
 plt.ylabel('Total Calculations', fontsize=14)
 #plt.legend()
-plt.savefig('MMS')
-
+plt.show()
