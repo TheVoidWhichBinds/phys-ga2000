@@ -61,13 +61,19 @@ def isodecays():
 
 isocount = isodecays()
 
-plt.plot(tpoints,isocount[:,0],label = 'B213')
-plt.plot(tpoints,isocount[:,1],label = 'B213')
-plt.plot(tpoints,isocount[:,2],label = 'B213')
-plt.plot(tpoints,isocount[:,3],label = 'B213')
+
+fig, major = plt.subplots()
+plt.title('Bismuth-213 Decay', fontsize=17)
+plt.xlabel('Time (seconds)', fontsize=12)
+plt.ylabel('Radioisotope Population', fontsize=12)
+plt.plot(tpoints,isocount[:,0],label = 'Bi213', color = 'r')
+plt.plot(tpoints,isocount[:,3],label = 'Bi209', color = 'b')
+
+minor = major.twinx()
+minor.set_ylim(0,1000)
+plt.plot(tpoints,isocount[:,1],label = 'Tl209', color = 'g')
+plt.plot(tpoints,isocount[:,2],label = 'Pb209', color = 'm')
+
+#LEGEND NEEDED
+
 plt.savefig('isocount')
-
-
-    
-
-

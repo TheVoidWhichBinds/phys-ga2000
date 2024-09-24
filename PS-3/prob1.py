@@ -21,16 +21,16 @@ def matrixdot(N,A,B):
     return (enddot - startdot)
 
 
-N_max = 100
-steps = int(N_max/20)
+N_max = 200
+steps = int(N_max/10)
 matrix_sizes = np.arange(10,N_max,steps)
 timex_avg = np.zeros(len(matrix_sizes))
 timedot_avg = np.zeros(len(matrix_sizes))
-iavg = 1
+iavg = 5
 for i,N in enumerate(matrix_sizes):
-    A = np.random.rand(N,N)
-    B = np.random.rand(N,N)
-    C = np.random.rand(N,N)
+    A = np.random.rand(N,N)-1
+    B = np.random.rand(N,N)-1
+    C = np.random.rand(N,N)-1
     timex = 0
     timedot = 0
     for a in range(iavg):
@@ -49,7 +49,8 @@ calcx.set_ylim(0, max(timex_avg) * 1.1)
 calcdot = calcx.twinx()  # Instantiate a second axes that shares the same x-axis
 calcdot.scatter(matrix_sizes, timedot_avg, color='g', marker='o', label='NumPy Dot Product')
 calcdot.set_ylim(0, max(timedot_avg) * 1.1) 
-
+calcdot.set_yscale('log')
+calcdot.set_ylim(1e-5, max(timedot_avg) * 2)
 # Add legends
 
 calcx.legend(loc='upper left')
