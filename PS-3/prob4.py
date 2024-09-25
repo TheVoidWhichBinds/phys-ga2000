@@ -1,27 +1,38 @@
 import numpy as np
-import timeit
+import matplotlib.pyplot as plt
+from scipy.stats import skew, kurtosis
 
-#function[] of N how the mean, variance, skewness, and kurtosis of the distribution change.
+Nval = np.arange(10,1000) #array of the various N values.
+s = 1000 #number of samples.
 
-N = 100
-s = 1000
-x_i = np.random
-
-def y_variate(N):
-    x_i = np.exponential(N,s)
-    y = 0
-    for i in range(N):
-        y_i = (1/N)*(x_i)
-        y = y + y_i
+def sample(N,s):
+    x = np.random.default_rng().exponential(scale=1, size=(s,N)) #array of random variates from e^-x.
+    y = np.mean(x, axis=1) #y = (1/N)*sum(x_i)
     return y
-    
-    
-#make Gaussian to overlay plot
-#for kurtosis, etc., use numpy et al packages to overlay 
-#mean close to 1 
-#skoonis close to 2
-#kurtosis close to 4
-    
-#expectation value of y = (1/N)*sum to N of Expectation value of x_i where expectation of x_i
-#equals infinite sum from 0 to infinity of x*p(x)dx = 1
-#sqrt(N)(y-mu)/sigma --> Gaussian (standard limit theorem)
+
+#initialization of arrays for different quantities of interest.
+mean_val = []
+variance_val = []
+skew_val = []
+kurtosis_val = []
+
+for N in Nval: #for each N value, the x variate is calculated over an average sampling of s.
+    y = sample(N,s) 
+    #statistical quantities of interest are collected in their respective arrays.
+    mean_val.append(np.mean(y))
+    variance_val.append(np.var(y))    
+    skew_val.append(skew(y))  
+    kurtosis_val.append(kurtosis(y))
+
+plt.figure()
+plt.plot(Nval, mean_val, label='Mean')
+plt.plot(Nval, kurtosis_val, label='Kurtosis')
+plt.plot(Nval, skew_val, label='Skew')
+plt.plot(Nval, variance_val, label='Variance', color = 'm')
+plt.xscale('log')
+plt.xlabel('N')
+plt.ylabel('Statistic Value')
+plt.legend()
+plt.title('Mean, Variance, Skewness, and Kurtosis as a function of N')
+plt.savefig('CLT')
+
