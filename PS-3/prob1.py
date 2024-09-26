@@ -20,7 +20,7 @@ def matrixdot(N,A,B): #NumPy dot product calculation of a matrix product.
     return (enddot - startdot) #time taken to run calc.
 
 
-N_max = 200 #maximum NxN matrix dimensions.
+N_max = 400 #maximum NxN matrix dimensions.
 steps = int(N_max/10) #step size in matrix dimensions.
 matrix_sizes = np.arange(10,N_max,steps) #array of matrix dimension(s) N.
 timex_avg = np.zeros(len(matrix_sizes)) #initializes array to store time taken for size NxN matrices.
