@@ -16,19 +16,19 @@ def anharmonic(a):
     wp = 0.5*a*w
 
 
-    def V(xp):
-        potential = xp**4
+    def V(xp): #allows input for a potential of any form.
+        potential = xp**4 
         return potential
     
     def integral(a,xp):
-        Vdiff = V(a)-V(xp)
-        valid_Vdiff = np.where(Vdiff>0, Vdiff, np.inf)
-        return 1/np.sqrt(valid_Vdiff)
+        Vdiff = V(a)-V(xp) #potential difference between max and all other points.
+        valid_Vdiff = np.where(Vdiff>0, Vdiff, np.inf) #ensures no divide by zero.
+        return 1/np.sqrt(valid_Vdiff) #outputs denominator in integral.
     
     T = 0.0
     for i in range(N):
-        T += wp[i]*integral(a,xp[i])
-    return C*T
+        T += wp[i]*integral(a,xp[i]) #integral via gaussian quadrature.
+    return C*T #period calculated.
 
 T = np.array([anharmonic(a) for a in amp])
 
