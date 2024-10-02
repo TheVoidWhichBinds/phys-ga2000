@@ -13,7 +13,7 @@ def Hermite(n,x): #calculates Hermite polynomial for the nth energy level.
         H[0,:] = 1
         H[1,:] = 2*x
         for i in range(2,n+1):
-            H[i,:] = 2*x*H[i-1,:] - 2*n*H[i-2,:]
+            H[i,:] = 2*x*H[i-1,:] - 2*(i-1)*H[i-2,:]
     return H
         
 
@@ -24,15 +24,15 @@ def Schrodinger(n,x): #wave(function^2)
 
 
 def quantum_uncertainty(n,N):
-    a = -np.inf #lower bound of integral.
-    b = np.inf #upper bound of integral.
-    x,w = np.polynomial.legendre.leggauss(N) #generates reference point locations and their weights for Legendre polynomials.
-    xp = 0.5*(b-a)*x + 0.5*(b+a) 
-    wp = 0.5*(b-a)*w
-
+    a = -1 #lower bound of integral (really negative infinity but with change of variables).
+    b = 1 #upper bound of integral (really positive infinity but with change of variables).
+    xg,wg = np.polynomial.legendre.leggauss(N) #generates reference point locations and their weights for Legendre polynomials.
+    x = np.linspace(-1,1,100)
+    xm = xg/(1-xg**2)
+    dxm = (1+xg**2)/(1-xg**2)**2
     rms = np.float32(0.0)
     for i in range(N):
-        rms += wp[i]*Schrodinger(n,xp)[i]
+        rms += (dxm[i]*wg[i]*(xm[i]**2)*np.abs(Schrodinger(n,xm)[i])**2)
 
     return np.sqrt(rms)
 
@@ -43,15 +43,10 @@ print(quantum_uncertainty(5,100))
 
 
 
-
-
-
-
-
 plt.figure(figsize=(10, 6)) 
-plt.title('1-Dimensional Harmonic Oscillator')
-plt.ylabel(r'Probability Density $\Psi$')
-plt.xlabel('Position x')
+plt.title('1-Dimensional Harmonic Oscillator', fontsize = 20)
+plt.ylabel(r'Probability Density $\Psi$', fontsize = 14)
+plt.xlabel('Position x', fontsize = 14)
 
 r1 = np.linspace(-4,4,100)
 plt.plot(r1,Schrodinger(0,r1), label = 'n = 0', color = 'r')
@@ -63,10 +58,9 @@ plt.savefig('Wavefunctions')
 
 
 plt.figure(figsize=(10, 6)) 
-plt.title('1-Dimensional Harmonic Oscillator')
-plt.ylabel(r'Probability Density $\Psi$')
-plt.yticks(np.arange(-6e5, 6e5, 1e5))
-plt.xlabel('Position x')
+plt.title('1-Dimensional Harmonic Oscillator', fontsize = 20)
+plt.ylabel(r'Probability Density $\Psi$',fontsize = 14)
+plt.xlabel('Position x',fontsize = 14)
 
 r2 = np.linspace(-10,10,500)
 plt.plot(r2,Schrodinger(30,r2), label = 'n = 30', color = 'm')

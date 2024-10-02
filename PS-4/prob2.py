@@ -7,7 +7,7 @@ C = np.sqrt(8*m) #constant in front of the integral.
 N = 20
 
 amax = 2
-amp = np.arange(0,amax,amax/100)
+amp = np.arange(0,amax,amax/1000)
 
 
 def anharmonic(a):
@@ -22,7 +22,7 @@ def anharmonic(a):
     
     def integral(a,xp):
         Vdiff = V(a)-V(xp) #potential difference between max and all other points.
-        valid_Vdiff = np.where(Vdiff>0, Vdiff, np.inf) #ensures no divide by zero.
+        valid_Vdiff = np.where(Vdiff>0, Vdiff, np.nan) #ensures no divide by zero.
         return 1/np.sqrt(valid_Vdiff) #outputs denominator in integral.
     
     T = 0.0
@@ -33,9 +33,9 @@ def anharmonic(a):
 T = np.array([anharmonic(a) for a in amp])
 
 plt.figure()
-plt.title('Anharmonic Oscillator')
-plt.xlabel('Initial Amplitude')
-plt.ylabel('Period')
+plt.title('Anharmonic Oscillator', fontsize = 17)
+plt.xlabel('Initial Amplitude', fontsize = 12)
+plt.ylabel('Period', fontsize = 12)
 plt.xscale('log')
 plt.plot(amp,T, color = 'g')
 plt.savefig('Anharmonic_Oscillator')
