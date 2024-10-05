@@ -27,7 +27,6 @@ def quantum_uncertainty(n,N):
     a = -1 #lower bound of integral (really negative infinity but with change of variables).
     b = 1 #upper bound of integral (really positive infinity but with change of variables).
     xg,wg = np.polynomial.legendre.leggauss(N) #generates reference point locations and their weights for Legendre polynomials.
-    x = np.linspace(-1,1,100)
     xm = xg/(1-xg**2)
     dxm = (1+xg**2)/(1-xg**2)**2
     rms = np.float32(0.0)

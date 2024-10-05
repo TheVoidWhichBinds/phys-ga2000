@@ -1,7 +1,7 @@
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-from jax import autodiff
+#from jax import autodiff
 
 
 def central_difference(x): #calculates derivative of the function using central difference.
