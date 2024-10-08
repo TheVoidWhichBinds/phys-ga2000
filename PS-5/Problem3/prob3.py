@@ -25,36 +25,33 @@ a = data['signal'].values
 # Center the time values (scaling: subtract mean and divide by standard deviation)
 t_mean = np.mean(t)
 t_std = np.std(t)
-t_scaled = (t - t_mean) / t_std  # This improves numerical stability for SVD
+ts = (t - t_mean) / t_std  # This improves numerical stability for SVD
 
 # Construct the design matrix for a third-order polynomial
 # We are fitting y = c0 + c1*x + c2*x^2 + c3*x^3
-A = np.column_stack([np.ones_like(t_scaled), t_scaled, t_scaled**2, t_scaled**3])
+def polynomial_fit(ts,n):
+    T_n = np.column_stack([ts**i for i in range(n)])
 
-# Perform the Singular Value Decomposition (SVD)
-U, s, Vt = np.linalg.svd(A, full_matrices=False)
-S_inv = np.diag(1/s)
+    U, Sigma, Vt = np.linalg.svd(T_n, full_matrices=False)
+    Sigma_inv = np.diag(1/Sigma)
 
-# Compute the pseudoinverse of the design matrix
-A_pseudo_inv = Vt.T @ S_inv @ U.T
+    T_pseudoinv = Vt.T @ Sigma_inv @ U.T
 
-# Solve for the coefficients (c0, c1, c2, c3)
-coefficients = A_pseudo_inv @ a
 
-# Create a function for the best-fit polynomial model
-def model(x, coeffs):
-    return coeffs[0] + coeffs[1] * x + coeffs[2] * x**2 + coeffs[3] * x**3
+    co = T_pseudoinv @ a
 
-# Generate model predictions using the scaled time data
-a_fit = model(t_scaled, coefficients)
 
-# (c) Calculate residuals and compare with measurement uncertainties
-residuals = a - a_fit
+    def model(x, co):
+        return co[0] + co[1] * x + co[2] * x**2 + co[3] * x**3
 
-# Plot the fit and residuals
+
+    poly_fit = model(ts, co)
+
+    residuals = a - poly_fit
+
+
+
 plt.figure(figsize=(8, 6))
-
-# Plot the original data and the fitted polynomial
 plt.subplot(2, 1, 1)
 plt.plot(t, a, 'o', label='Signal Data')
 plt.plot(t, a_fit, label='Best Fit (3rd order polynomial)', color='red')
