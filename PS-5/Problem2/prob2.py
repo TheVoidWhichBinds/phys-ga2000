@@ -21,10 +21,10 @@ plt.savefig('GammaFunction_Integrand')
 
 def gamma(a):
     x,w = np.polynomial.legendre.leggauss(100) #generates x100 reference point locations and their weights for Legendre polynomials.
-    c = np.ones((100,1))*(a-1)
+    c = np.ones(100)*(a-1)
     z = x/(x+c)
     dz = (c)/(x+c)**2
-    f = np.exp(c*np.log(z)-z)
+    f = np.exp(c*np.log(z) - z)
     gamfunc = 0.0
     for i in range(100):
         gamfunc += w[i]*f[i]*dz[i]
