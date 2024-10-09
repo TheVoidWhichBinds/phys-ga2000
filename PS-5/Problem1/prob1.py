@@ -15,7 +15,7 @@ def central_difference(x): #calculates derivative of the function using central 
 
 #graph settings.
 plt.figure(figsize=(10, 6)) 
-plt.title('Derivative Methods', fontsize = 20)
+plt.title('Central Difference', fontsize = 20)
 plt.ylabel(r'Derivative $\frac{df}{dx}$',fontsize = 14)
 plt.xlabel('x',fontsize = 14)
 
@@ -23,4 +23,5 @@ plt.xlabel('x',fontsize = 14)
 x = np.linspace(-2,2,100)
 plt.scatter(x,[central_difference(xi) for xi in x], label='Central Difference dx=1e-6', color = 'b', s = 7)
 plt.plot(x,[1/(np.cosh(2*xi)**2) for xi in x], label = 'Analytic Derivative', color = 'r')
-plt.savefig('Derivative_Methods')
+plt.legend()
+plt.savefig('Central_Difference')
