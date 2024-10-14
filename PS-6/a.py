@@ -1,6 +1,7 @@
 from astropy.io import fits
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.linalg import eig
 
 #a
 
@@ -9,9 +10,6 @@ logwave = hdu_list['LOGWAVE'].data
 flux = hdu_list['FLUX'].data
 galaxies = len(flux)
 wavelengths = len(logwave)
-
-print("Sliced logwave:", np.shape(logwave))
-print("Sliced flux:", np.shape(flux))
 
 plt.figure(figsize = (12,9))
 plt.title('Central Optical Spectra', fontsize = 17)
@@ -24,22 +22,24 @@ plt.savefig('COS')
 #b
 
 def flux_normalization():
-    flux_sum = np.zeros(galaxies)
-    for i in range(galaxies):
-        flux_sum[i] = np.sum(flux[i,:])
-    flux_normed = np.dot(flux,1/flux_sum)
+    flux_sum = np.sum(flux, axis=1)
+    flux_normed = flux/flux_sum[:,np.newaxis]
     return flux_normed
 
 
 #c
 
 def flux_averaging():
-    flux_mean = np.zeros(galaxies)
-    for i in range(galaxies):
-        flux_mean[i] = np.sum(flux[i,:])/wavelengths
+    flux_mean = np.mean(flux_normalization(), axis=0)
     return flux_mean
 
 flux_residual = flux_normalization() - flux_averaging()
+
+
+#d
+
+C = flux_residual @ flux_residual.T
+Ceigval, Ceigvec = eig(C)
 
 
 hdu_list.close()
