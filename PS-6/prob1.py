@@ -5,9 +5,9 @@ from scipy.linalg import eig
 from time import time
 
 hdu_list = fits.open('specgrid.fits')
-logwave = hdu_list['LOGWAVE'].data
-flux = hdu_list['FLUX'].data[0:500,:]
-galaxies = len(flux)
+logwave = hdu_list['LOGWAVE'].data #wavelengths of interest.
+flux = hdu_list['FLUX'].data[0:500,:] #choosing only first 500 galaxies to run code faster.
+galaxies = len(flux) #galaxies.
 wavelengths = len(logwave)
 
 plt.figure(figsize=(12, 9))
