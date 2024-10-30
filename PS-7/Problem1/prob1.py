@@ -13,8 +13,8 @@ def Lagrange(r_0,R,m,M): #function inputs: initial guess, distance beteween cent
         f_p = (-2/r_p**3) - (1) - (2*m_p/(1-r_p)**3) #Derivative of the above function.
         r_delta = f/f_p
         r_p -= r_delta #Newton-Raphson iteration formula.
-        return f"{r_p * R:.3e}"
+    return f"{r_p * R:.3e}"
 
-print('The Lagrange point between the Earth and Moon is ', Lagrange(3e8,3.844e8,7.438e22,5.972e24), 'meters from the center of the Earth')
-print('The Lagrange point between the Sun and Earth is ', Lagrange(1.3e11,1.496e11,5.972e24,1.989e30), 'meters from the center of the Sun')
-print('The Lagrange point of a Jupiter-mass planet orbiting the Sun at the distance of Earth is ', Lagrange(1.3e8,1.496e11,1.898e27,1.989e30), 'meters from the center of the Sun')
+print('The Lagrange point between the Earth and Moon is ', Lagrange(3e8,3.844e8,7.438e22,5.972e24), 'meters from the center of the Earth.')
+print('The Lagrange point between the Sun and Earth is ', Lagrange(1.3e11,1.496e11,5.972e24,1.989e30), 'meters from the center of the Sun.')
+print('The Lagrange point of a Jupiter-mass planet orbiting the Sun at the distance of Earth is ', Lagrange(1.3e8,1.496e11,1.898e27,1.989e30), 'meters from the center of the Sun.')
