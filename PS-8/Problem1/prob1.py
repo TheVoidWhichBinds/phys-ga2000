@@ -1,46 +1,49 @@
 import jax.numpy as jnp
-from jax import grad, hessian
+from jax import hessian
 from jax.scipy.optimize import minimize
+import matplotlib.pyplot as plt  
+import pandas as pd
 
-# Define the logistic function
-def logistic(x, beta0, beta1):
-    return 1 / (1 + jnp.exp(-(beta0 + beta1 * x)))
+#Unpacking the data.
+data = pd.read_csv('survey.csv') 
+age = jnp.array(data.iloc[:, 0].values)    
+answer = jnp.array(data.iloc[:, 1].values) 
 
-# Define the negative log-likelihood function
-def negative_log_likelihood(params, x, y):
+
+#Probability function defined.
+def logistic(age, beta0, beta1): #Takes x, and betas to be optimized.
+    return 1 / (1 + jnp.exp(-(beta0 + beta1 * age)))
+
+# Defines the negative log-likelihood function.
+def negative_log_likelihood(params, age, answer):
     beta0, beta1 = params
-    p = logistic(x, beta0, beta1)
-    # Add a small value to prevent log(0)
-    eps = 1e-10
-    return -jnp.sum(y * jnp.log(p + eps) + (1 - y) * jnp.log(1 - p + eps))
+    p = logistic(age, beta0, beta1) #Calling probability func.
+    eps = 1e-10 #Small value added prevent log(0).
+    return -jnp.sum(answer * jnp.log(p + eps) + (1 - answer) * jnp.log(1 - p + eps))
 
-# Load or define your data for `x` (ages) and `y` (responses 0 or 1)
-x_data = jnp.array([1,2,3,4,5])  # Ages
-y_data = jnp.array([1,0,1,1,0])  # Responses (1 for "yes", 0 for "no")
 
-# Initial guess for beta0 and beta1
-initial_params = jnp.array([0.0, 0.0])
 
-# Optimize to find the best beta0 and beta1
-result = minimize(negative_log_likelihood, initial_params, args=(x_data, y_data))
-beta0_opt, beta1_opt = result.x
+#Initial guess for beta0 and beta1.
+initial_params = jnp.array([-0.2, 1.1])
+#Optimization to find the best beta0 and beta1 based on initial guess.
+optimized_params = minimize(negative_log_likelihood, initial_params, args=(age, answer), method='BFGS')
+beta0_opt, beta1_opt = optimized_params.x
 
-# Compute the covariance matrix using the Hessian
-hess = hessian(negative_log_likelihood)(jnp.array([beta0_opt, beta1_opt]), x_data, y_data)
+#Covariance matrix computed using the Hessian.
+hess = hessian(negative_log_likelihood)(jnp.array([beta0_opt, beta1_opt]), age, answer)
 cov_matrix = jnp.linalg.inv(hess)
 
-# Formal errors are the square roots of the diagonal elements of the covariance matrix
+#Formal errors are the square roots of the diagonal elements of the covariance matrix.
 errors = jnp.sqrt(jnp.diag(cov_matrix))
 
-# Plot the results
-import matplotlib.pyplot as plt
 
-ages = jnp.linspace(min(x_data), max(x_data), 100)
-probabilities = logistic(ages, beta0_opt, beta1_opt)
 
-plt.scatter(x_data, y_data, label="Survey Data", alpha=0.5)
-plt.plot(ages, probabilities, label="Logistic Model", color="red")
+ages = jnp.linspace(min(age), max(age)) #graph x-axis
+probability = logistic(ages, beta0_opt, beta1_opt) #probability function with optimized beta values.
+
+plt.plot(ages, probability, label="Logistic Model", color="red")
 plt.xlabel("Age")
 plt.ylabel("Probability of 'Yes'")
 plt.legend()
-plt.show()
+plt.savefig('Max_Likelihood.png')
+
