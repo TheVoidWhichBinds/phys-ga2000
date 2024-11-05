@@ -35,8 +35,6 @@ cov_matrix = jnp.linalg.inv(hess)
 
 #Formal errors are the square roots of the diagonal elements of the covariance matrix.
 errors = jnp.sqrt(jnp.diag(cov_matrix))
-print(f'The error ')
-
 
 ages = jnp.linspace(min(age), max(age)) #graph x-axis
 probability = logistic(ages, beta0_opt, beta1_opt) #probability function with optimized beta values.
