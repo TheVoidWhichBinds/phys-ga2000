@@ -14,7 +14,7 @@ answer = jnp.array(data.iloc[:, 1].values)
 def logistic(age, beta0, beta1): #Takes x, and betas to be optimized.
     return 1 / (1 + jnp.exp(-(beta0 + beta1 * age)))
 
-# Defines the negative log-likelihood function.
+#Defines the negative log-likelihood function.
 def negative_log_likelihood(params, age, answer):
     beta0, beta1 = params
     p = logistic(age, beta0, beta1) #Calling probability func.
@@ -35,15 +35,17 @@ cov_matrix = jnp.linalg.inv(hess)
 
 #Formal errors are the square roots of the diagonal elements of the covariance matrix.
 errors = jnp.sqrt(jnp.diag(cov_matrix))
-
+print(f'The error ')
 
 
 ages = jnp.linspace(min(age), max(age)) #graph x-axis
 probability = logistic(ages, beta0_opt, beta1_opt) #probability function with optimized beta values.
-
-plt.plot(ages, probability, label="Logistic Model", color="red")
-plt.xlabel("Age")
-plt.ylabel("Probability of 'Yes'")
+plt.figure(figsize=(8, 6))
+plt.scatter(age, answer, label='Observed Data', color='blue', alpha=0.6)
+plt.plot(ages, probability, label='Logistic Model', color='r')
+plt.xlabel('Age (years)', fontsize =12)
+plt.ylabel("Probability of 'Yes'", fontsize = 12)
 plt.legend()
+plt.title("'Be Kind, Rewind' Phrase Recognition", fontsize = 14)
 plt.savefig('Max_Likelihood.png')
 

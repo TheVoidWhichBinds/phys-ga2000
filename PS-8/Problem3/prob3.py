@@ -22,7 +22,7 @@ def reconstructed(percentage):
     
     nonzero = int(percentage*len(c)) #Calculates the number of indices of c we want to keep based on the input percentage.
     c_mod = np.zeros(len(c), dtype=complex) #Initializes new coefficient array.
-    c_mod[0:nonzero] = np.abs(c[0:nonzero]) #Fills the first {percentage}% of the new coefficient array with the c.
+    c_mod[0:nonzero] = (c[0:nonzero]) #Fills the first {percentage}% of the new coefficient array with the c.
     dow_ifft = np.fft.irfft(c_mod) #Reconstructs the data based on the new coeffficent array.
 
     #Plots the reconstructed data over the original data. Setting percentage to 100% verifies that the original data is recovered.
@@ -33,7 +33,7 @@ def reconstructed(percentage):
     plt.plot(dow, color = 'g', label = 'original data')
     plt.plot(dow_ifft, color='m', label=f'First {percentage*100:.1f}% of Fourier coefficients')
     plt.legend()
-    plt.savefig(f'DJR_{int(percentage * 100)}%.png')  # Add file extension
+    plt.savefig(f'DJR_{int(percentage * 100)}.png')  # Add file extension
     plt.close()  # Close the plot
 
 
@@ -42,5 +42,4 @@ reconstructed(0.1)
 
 #e )
 reconstructed(0.02)
-
 

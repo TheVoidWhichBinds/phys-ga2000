@@ -10,7 +10,7 @@ def FFT(instrument, instrument_name):
     #Plots data.
     plt.figure(figsize=(10, 6))
     plt.title(f'{instrument_name} Note', fontsize=18)
-    plt.xlabel('Time', fontsize=16)
+    plt.xlabel('Time (s)', fontsize=16)
     plt.ylabel('Amplitude', fontsize=16)
     plt.plot(np.arange(0, len(instrument)), instrument, color='m')
     plt.savefig(f'{instrument_name}_Signal.png')
@@ -23,7 +23,7 @@ def FFT(instrument, instrument_name):
     #Plotting Fourier coefficients on a frequency vs. magnitude graph.
     plt.figure(figsize=(10, 6))
     plt.title(f'{instrument_name} Note Fourier Coefficients', fontsize=18)
-    plt.xlabel('Frequency', fontsize=16)
+    plt.xlabel('Frequency (Hz)', fontsize=16)
     plt.xlim(0,5000)
     plt.ylabel('Magnitude', fontsize=16)
     plt.plot(frequencies, abs(c))
