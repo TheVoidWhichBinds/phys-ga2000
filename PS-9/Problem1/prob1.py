@@ -21,10 +21,12 @@ def xv_evolution(x_0, v_0, oscillator):
         v_array.append(state[1])
         
         #Runge-Kutta 4th Order implimentation:
-        k1 = delta_t*oscillator(state, t_p)
-        k2 = delta_t*oscillator(state + 0.5*k1, t_p + 0.5*delta_t)
-        k3 = delta_t*oscillator(state + 0.5*k2, t_p + 0.5*delta_t)
-        k4 = delta_t*oscillator(state + k3, t_p + delta_t)
+        #Application of RK4 in these Problems don't need normal time manipulation because
+        #none of the equations are explicitly time-dependent.
+        k1 = delta_t*oscillator(state)
+        k2 = delta_t*oscillator(state + 0.5*k1)
+        k3 = delta_t*oscillator(state + 0.5*k2)
+        k4 = delta_t*oscillator(state + k3)
         state += (k1 + 2*k2 + 2*k3 + k4)/6
     return x_array, v_array
 #-------------------------------------------------------------------------------------------------
@@ -32,7 +34,7 @@ def xv_evolution(x_0, v_0, oscillator):
 
 
 #Harmonic Oscillator function that returns the derivative functions. 
-def harmonic_osc(state, t):
+def harmonic_osc(state):
     x = state[0]
     v = state[1]
     x_prime = v
@@ -62,7 +64,7 @@ plt.savefig('Harmonic_Oscillator_PhaseSpace')
 
 
 #Anharmonic Oscillator function that returns the derivative functions. 
-def anharmonic_osc(state, t):
+def anharmonic_osc(state):
     x = state[0]
     v = state[1]
     x_prime = v
@@ -94,7 +96,7 @@ t = np.arange(t_0, t_f, delta_t)
 
 def Pol_solver(x_0, v_0, mu):
     #van der Pol oscillator function that returns the derivative functions.
-    def Pol_osc(state, t, mu):
+    def Pol_osc(state, mu):
         x = state[0]
         v = state[1]
         x_prime = v
@@ -110,16 +112,17 @@ def Pol_solver(x_0, v_0, mu):
         v_array.append(state[1])
         
         #Runge-Kutta 4th Order implimentation:
-        k1 = delta_t*Pol_osc(state, t_p, mu)
-        k2 = delta_t*Pol_osc(state + 0.5*k1, t_p + 0.5*delta_t, mu)
-        k3 = delta_t*Pol_osc(state + 0.5*k2, t_p + 0.5*delta_t, mu)
-        k4 = delta_t*Pol_osc(state + k3, t_p + delta_t, mu)
+        k1 = delta_t*Pol_osc(state, mu)
+        k2 = delta_t*Pol_osc(state + 0.5*k1, mu)
+        k3 = delta_t*Pol_osc(state + 0.5*k2, mu)
+        k4 = delta_t*Pol_osc(state + k3, mu)
         state += (k1 + 2*k2 + 2*k3 + k4)/6
     return x_array, v_array
 
+
 # Plotting Pol oscillator with different mu:
 plt.figure()
-plt.title('van der Pol Oscillator')
+plt.title('van der Pol Oscillator Phase Space')
 plt.xlabel('Position')
 plt.ylabel('Velocity')
 plt.plot(Pol_solver(1,0,1)[0], Pol_solver(1,0,1)[1], color = 'b', label=r'$\mu = 1$')
