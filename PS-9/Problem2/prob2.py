@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
 
 #Constant coefficients:
 R = 0.08 #[m]
@@ -11,8 +12,8 @@ theta = np.pi/6 #[radians -> 30 degrees] (Counter-clockwise with respect to the 
 
 #Arbitrary time parameters:
 t_0 = 0
-t_f = 7 #[s]
-N = 100 #Number of time steps.
+t_f = 20 #[s]
+N = 1000 #Number of time steps.
 delta_t = (t_f - t_0)/N
 t = np.arange(t_0, t_f, delta_t)
 #------------------------------------------------------------------------------------------------
@@ -39,15 +40,15 @@ def cannonball(motion, m):
 
 
 def trajectory(m):
-    x_array = []
-    y_array = []
+    x_array = np.array([])
+    y_array = np.array([])
     Vx_0 = V_0*np.cos(theta)
     Vy_0 = V_0*np.sin(theta)
     motion = np.array([0,0,Vx_0,Vy_0], float) #Initializing x,y,Vx,Vy state array.
 
     for t_p in t:
-        x_array.append(motion[0])
-        y_array.append(motion[1])
+        x_array = np.append(x_array, motion[0])
+        y_array = np.append(y_array, motion[1])
         #Runge-Kutta 4th Order implimentation:
         #Application of RK4 in these Problems don't need normal time manipulation because
         #none of the equations are explicitly time-dependent.
@@ -65,6 +66,7 @@ def trajectory(m):
 plt.figure()
 plt.subplot()
 plt.title('Mass Effect on Cannonball Trajectory')
+plt.xlim(0,600)
 plt.ylim(-1,60)
 plt.xlabel('X Position [meters]')
 plt.ylabel('Y Position [meters]')
@@ -80,25 +82,19 @@ plt.figure()
 plt.title('Mass Effect on Cannonball Trajectory')
 plt.xlabel('Cannonball Mass [kg]')
 plt.ylabel('Maximum Horizontal Displacement [meters]')
+plt.ylim(0,1000)
 
-zero = 1
-m_var = np.arange(1, 10000, 100)
-mass_values = []
-x_max_values = []
-
+m_var = np.arange(1, 80, 2)
+mass_values = np.array([])  # Explicitly initialized as a NumPy array
+x_max_values = np.array([])  # Explicitly initialized as a NumPy array
 for mass in m_var:
-    y_array = trajectory(mass)[1]  # Extract the y-array (vertical positions)
-    for i in range(10, len(y_array) - 10):  # Loop through the y_array to find where y = 0
-        if np.abs(y_array[i]) < zero:  # When y reaches 0 (or close to 0)
-            x_max_index = i  # Store the index where y = 0
-            mass_values.append(mass)  # Add mass to the list
-            x_max_values.append(trajectory(mass)[0][x_max_index])  # Add the corresponding x value
-            print(mass_values, x_max_values)
-        else:
+    mass_values = np.append(mass_values, mass)  # Append mass value
+    x_array, y_array = trajectory(mass)  # Compute trajectory
+    for i in range(1, len(y_array)):  # Detect zero crossing
+        if y_array[i - 1] > 0 and y_array[i] <= 0:
+            x_max_index = i
+            x_max_values = np.append(x_max_values, x_array[x_max_index])  # Append x value
             break
 
-plt.scatter(mass_values, x_max_values, color='m', label='Max Horizontal Displacement')
-plt.legend()
-
+plt.scatter(mass_values, x_max_values, s=12, color='m')
 plt.savefig('Mass_Effect2')
-
