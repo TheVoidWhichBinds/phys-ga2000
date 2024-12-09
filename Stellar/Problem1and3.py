@@ -6,18 +6,13 @@ from Utilities import *
 
 if __name__ == "__main__":
     # Run the sun test
-    length_scale = R_sun
-    mass_scale = M_sun
-    luminosity_scale = L_sun
-    mu = mu_sun
-    num_iter = 3000
+    num_iter = 1000
     step_size = 1/num_iter
-    scale_factors = UnitScalingFactors(mass_scale, length_scale, luminosity_scale)
-    extra_params = generate_extra_parameters(mass_scale, length_scale, luminosity_scale, E_0_sun, kappa_0_sun, mu_sun)
+    scale_factors = UnitScalingFactors(M_sun, R_sun, L_sun)
+    extra_params = generate_extra_parameters(M_sun, R_sun, L_sun, E_0_sun, kappa_0_sun, mu_sun)
 
     #print("Extra:", constants)
-    optimal_core = run_minimizer(1E7/scale_factors[TEMP_UNIT_INDEX],1E16/scale_factors[PRESSURE_UNIT_INDEX], 
-                                       num_iter, step_size, mass_scale, length_scale, luminosity_scale, 
+    optimal_core = run_minimizer(1E16/scale_factors[PRESSURE_UNIT_INDEX],1E7/scale_factors[TEMP_UNIT_INDEX], num_iter, step_size, M_sun, R_sun, L_sun, 
                                        extra_params["E_prime"], extra_params["kappa_prime"], extra_params["mu"])
 
     core_initial = gen_core_conditions(optimal_core.x[0], optimal_core.x[1], step_size, extra_params) 

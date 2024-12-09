@@ -46,7 +46,7 @@ def UnitScalingFactors(M_0, R_0, L_0):
     rho_out = M_0/(np.power(R_0,3))
     t_0 = np.sqrt(np.power(R_0,3) / (G*M_0))
     P_out = M_0/(R_0*np.power(t_0,2))
-    T_out = (m_p*np.power(R_0,2)) / (np.power(t_0,2)*Boltzman) # Using m_p here since T_out is the temp scale on a particle level, not on a star level
+    T_out = (m_p*np.power(R_0,2)) / (np.power(t_0,2)*Boltzman) # Definition for T_out 
     return np.array([
             M_out,
             R_out,
@@ -71,18 +71,18 @@ def generate_extra_parameters(M_0, R_0, L_0, E_0, kappa, mu):
     Output:
         extra_const_params: python dictionary containing the converted constant parameters
     """
-    _,_,rho0, P0,L0,T0,t0 = UnitScalingFactors(M_0, R_0, L_0)
-    E_prefactor = np.power(R_0,5)*np.power(M_0,-1)*np.power(T0,-4)*np.power(t0,-3)
-    new_E = E_0/E_prefactor
+    _,_,rho0,P0,L0,T0,t0 = UnitScalingFactors(M_0, R_0, L_0)
+    
+    E_0_prime = E_0 * np.power(R_0,-5)*M_0*np.power(T0,4)*np.power(t0,3)
 
-    kappa_prefactor = np.power(M_0,-2)*np.power(R_0,5)*np.power(T0,3.5)
+    kappa_prefactor = np.power(M_0,2)*np.power(R_0,-5)*np.power(T0,-3.5)
     kappa_const_prefactor = (3/(16*StefanBoltz*np.power(4*np.pi,2) ))
-    new_kappa = kappa_const_prefactor*kappa/kappa_prefactor
+    kappa_0_prime = kappa_const_prefactor*kappa/kappa_prefactor
 
     extra_params = {
         "mu": mu,
-    "E_prime": new_E,
-    "kappa_prime": new_kappa,
+    "E_0_prime": E_0_prime,
+    "kappa_0_prime": kappa_0_prime,
     }
     return extra_params
 

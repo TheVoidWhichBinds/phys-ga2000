@@ -43,13 +43,12 @@ def gen_outer_conditions():
         Output:
             1x6 numpy array containing initial conditions in scaled variables
     """
-    epsilon = 1E-4
-    rho_outer = epsilon
+    rho_outer = Utilities.global_tolerance
     M_outer = 1
     R_outer = 1
     L_outer = 1
-    P_outer = 0
-    T_outer = epsilon
+    P_outer = Utilities.global_tolerance
+    T_outer = Utilities.global_tolerance
     outer_conds = np.array((M_outer, R_outer, rho_outer, P_outer, L_outer, T_outer))
     return outer_conds
 
@@ -78,10 +77,10 @@ def halfway_diff(core_guess, num_iter, extra_params, step_size):
     
     core_conditions_solved = outwards[0,[0,1,4]]
     outer_conditions_solved = inwards[0,:]
-    boundary = np.sum(np.abs(Utilities.global_tolerance*np.array([1,1,1]) - core_conditions_solved)  +  np.abs(np.array([1,1,0,0,1,0]) - outer_conditions_solved))
-    boundary_weight = 10
+    boundary = np.sum(np.abs(Utilities.global_tolerance*np.array([1,1,1]) - core_conditions_solved))  +  np.sum(np.abs(np.array([1,1,0,0,1,0]) - outer_conditions_solved))
+    boundary_weight = 0
     
-    return diff_weight*diff**2 + boundary_weight*bound_match
+    return diff_weight*diff**2 + boundary_weight*boundary
 
 
 
@@ -101,7 +100,6 @@ def run_minimizer(P_guess, T_guess, num_iters, step_size, M_0, R_0, L_0, E_0, ka
             OptimizeResult from scipy.optimize.minimize
     """
     core_guess = np.array([P_guess, T_guess])
-    solver = Integrator.ODESolver
     extra_params = Utilities.generate_extra_parameters(M_0, R_0, L_0, E_0, kappa, mu)
 
     return sp.optimize.minimize(halfway_diff, core_guess,
