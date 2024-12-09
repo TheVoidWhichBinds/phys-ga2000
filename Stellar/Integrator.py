@@ -51,26 +51,27 @@ def RK4(f, current, step_size, extra_const_params):
         1x6 numpy array containing Derivatives of all variables of current. Independent variable (mass) is just step size. Density is calculated outside of RK4
     """
     assert(step_size >0)
-#   assert(current.shape == (6,))
     step_size = np.float64(step_size)
-    half_step_size = step_size/2
-    
-    #k1-k4 are reference points for RK integration.
-    k1 = f(current,extra_const_params)
-    new_input = current + half_step_size*k1 
+    # half_step_size = step_size/2                    Unnecessary variable assignment.
 
-    k2 = f(new_input,extra_const_params)
-    
-    new_input =current + half_step_size*k2 
-    k3 = f(new_input,extra_const_params)
+    # k1 = f(current,extra_const_params)              RK4 Formula incorrect, see pg. 336 of Newman
+    # new_input = current + half_step_size*k1 
+    # k2 = f(new_input,extra_const_params)
+    # new_input =current + half_step_size*k2 
+    # k3 = f(new_input,extra_const_params)
+    # new_input = current+step_size*k3
+    # k4 = f(new_input,extra_const_params)
+    # update = (step_size/6) * (k1+2*k2+2*k3+k4)
 
-    new_input = current+step_size*k3
-    
-    k4 = f(new_input,extra_const_params)
-    update = (step_size/6) * (k1+2*k2+2*k3+k4)
-
-    # Return change in variables
+    dependent_array = np.array([0,1,1,1,1,1])
+    mass_array = np.array([1,0,0,0,0,0])
+    k1 = step_size * f(current, extra_const_params)
+    k2 = step_size * f(current + (k1/2)*dependent_array + (step_size/2)*mass_array, extra_const_params)
+    k3 = step_size * f(current + (k2/2)*dependent_array + (step_size/2)*mass_array, extra_const_params)
+    k4 = step_size * f(current + k3*dependent_array + step_size*mass_array, extra_const_params)
+    update = current + (k1+2*k2+2*k3+k4)/6
     return update
+
 
 if __name__ == "__main__":
     pass
@@ -83,7 +84,7 @@ def ODESolver(initial_conditions, num_steps, extra_const_parameters, verbose=Fal
             initial_conditions (1x6 np array): The initial conditions of the system
             num_steps (np.float64): The number of steps to take between 0 and 1
         Outputs:
-            state_matrix ( (num_stepsx6) np array):
+            state_matrix ((num_steps x 6) np array):
                 The state of the system at each mass step in time. Needed for plotting reasons
                 The final state is given by state_matrix[:,-1]
     """
@@ -95,17 +96,21 @@ def ODESolver(initial_conditions, num_steps, extra_const_parameters, verbose=Fal
         #RK4 outputs a 6x1 array with elements of: mass, radius, pressure, luminosity, 
         #temperature, and density. Only the element corresponding to the differential equation (derivatives[n])
         #input into RK4 has the correct updated value
-        delta  = RK4(derivative_calc, cur_state, step_size, extra_const_parameters)
+        update  = RK4(derivative_calc, cur_state, step_size, extra_const_parameters)
+        #
         if(verbose):
-            print(i, cur_state, delta)
-        if(np.any(np.isnan(delta))):
+            print(i, cur_state, update)
+        if(np.any(np.isnan(update))):
             break
-        cur_state = cur_state +delta
+        
+        #cur_state = cur_state + delta #                naming this "delta" is misleading - RK4 outputs the new state, not the delta between states - renamed instances of "delta" to "update"
+        cur_state = update
         cur_state[DENSITY_UNIT_INDEX] = equation_of_state(cur_state[PRESSURE_UNIT_INDEX], cur_state[TEMP_UNIT_INDEX], extra_const_parameters)
+        
         if(np.any(np.less(cur_state,0)) or (np.any(np.isnan(cur_state)))):
             break
         output.append( copy.deepcopy(cur_state) )
-#        print("End STEP: ", cur_state)
+    #   print("End STEP: ", cur_state)
     o = np.vstack(output)
     return o
 

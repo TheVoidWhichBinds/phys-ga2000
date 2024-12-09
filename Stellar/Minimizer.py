@@ -1,7 +1,7 @@
 import numpy as np
 import scipy as sp
 import Integrator
-import Utilities
+import Utilities 
 
 #MASS_UNIT_INDEX = 0 []
 #RADIUS_UNIT_INDEX = 1 []
@@ -9,9 +9,9 @@ import Utilities
 #PRESSURE_UNIT_INDEX = 3 [dynes/cm^2]
 #LUMINOSITY_UNIT_INDEX = 4 []
 #TEMP_UNIT_INDEX = 5 [K]
-#TIME_UNIT_INDEX = 6 
 
-def gen_initial_conditions(starting_scaled_temp, starting_scaled_pressure, step_size, const_params):
+
+def gen_initial_conditions(starting_scaled_temp, starting_scaled_pressure, step_size, extra_params):
     """
         Input:
             Helper function to deal with the fact that we can't start at m=0. We pretend that the central density is roughly constant, then fudge the boundary conditions a bit
@@ -22,14 +22,17 @@ def gen_initial_conditions(starting_scaled_temp, starting_scaled_pressure, step_
         Output:
             1x6 numpy array containing initial conditions in scaled variables
     """
-    initial_density =  Utilities.equation_of_state(starting_scaled_pressure, starting_scaled_temp,const_params)
+    initial_density =  Utilities.equation_of_state(starting_scaled_pressure, starting_scaled_temp, extra_params)
 # encode the boundary conditions of m'= L' = r'=0, plug put in the initial temp and pressure guesses
 # We need to fudge the radius initial condition to avoid the singularity at r=0 in the equations.
     initial_mass = step_size/2
     initial_rad = np.power((4*np.pi/3)*initial_mass/initial_density, 1/3)
-    initial_conds = np.array(  (initial_mass,initial_rad,initial_density,
+    initial_conds = np.array(  (initial_mass, initial_rad, initial_density,
                                 starting_scaled_pressure , 0, starting_scaled_temp) )
     return initial_conds
+
+
+
 
 def loss_function(estimator_guess, *args):
     """
@@ -54,7 +57,7 @@ def loss_function(estimator_guess, *args):
     initial_conds = gen_initial_conditions(initial_temp, initial_pressure, 1/n_steps, const_params)
 # use the ODE solver to propagate the initial conditions to the final state
     time_evolution = solver(initial_conds, n_steps, const_params)
-    final_mass = time_evolution[-1,Utilities.MASS_UNIT_INDEX]
+    final_mass = time_evolution[-1,Utilities.MASS_UNIT_INDEX]  #                  Maybe kill this since it's unused.
     final_pressure = time_evolution[-1,Utilities.PRESSURE_UNIT_INDEX]
     final_temp = time_evolution[-1,Utilities.TEMP_UNIT_INDEX]
     return   np.pow((final_pressure- expected_pressure),2) + np.pow(final_temp- expected_temp,2)

@@ -22,10 +22,10 @@ DENSITY_UNIT_INDEX = 2
 PRESSURE_UNIT_INDEX = 3
 LUMINOSITY_UNIT_INDEX = 4
 TEMP_UNIT_INDEX = 5
-TIME_UNIT_INDEX = 6 #      We are currently never using this - Kill?
+#TIME_UNIT_INDEX = 6 #                             We are currently never using this - Kill?
 
 
-def UnitScalingFactors( M_0, R_0):
+def UnitScalingFactors(M_0, R_0):
     """
     Returns the scaling factors to convert the unitless 
     numbers in the sim to physical units.
