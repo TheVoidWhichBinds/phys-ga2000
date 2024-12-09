@@ -10,7 +10,7 @@ if __name__ == "__main__":
     mass_scale = M_sun
     luminosity_scale = L_sun
     mu = mu_sun
-    num_iter = 1000
+    num_iter = 3000
     step_size = 1/num_iter
     scale_factors = UnitScalingFactors(mass_scale, length_scale, luminosity_scale)
     extra_params = generate_extra_parameters(mass_scale, length_scale, luminosity_scale, E_0_sun, kappa_0_sun, mu_sun)

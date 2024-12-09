@@ -24,14 +24,14 @@ def derivative_calc(current, extra_const_params):
     new_L = extra_const_params["E_prime"]* current[DENSITY_UNIT_INDEX]*np.power(current[TEMP_UNIT_INDEX],4)
     output[LUMINOSITY_UNIT_INDEX] = new_L
 
-    # assume that kappa_prime is in args
+    #assume that kappa_prime is in args
     cur_t = current[TEMP_UNIT_INDEX]
     multiplied_vars = cur_t* current[RADIUS_UNIT_INDEX]
     var = np.power(multiplied_vars, -4)
     tp = np.power(cur_t,-2.5) #!!!                   OVERFLOW/NaN being encountered               !!!
     new_T = - extra_const_params["kappa_prime"]* current[DENSITY_UNIT_INDEX] * current[LUMINOSITY_UNIT_INDEX] * var * tp 
     output[TEMP_UNIT_INDEX] = new_T
-    output[MASS_UNIT_INDEX] = 1
+    output[MASS_UNIT_INDEX] = 0 #Mass and density updated in RK4 and ODESolver so we make their change here = 0.
     output[DENSITY_UNIT_INDEX] = 0
     return output
 
@@ -68,7 +68,7 @@ def RK4(f, current, step_size, extra_const_params, inwards):
     k2 = step_size * f(current + (k1/2)*dependent_array + (step_size/2)*mass_array, extra_const_params)
     k3 = step_size * f(current + (k2/2)*dependent_array + (step_size/2)*mass_array, extra_const_params)
     k4 = step_size * f(current + k3*dependent_array + step_size*mass_array, extra_const_params)
-    update = current + (k1+2*k2+2*k3+k4)/6
+    update = current + (1/6)*(k1+2*k2+2*k3+k4)*dependent_array + step_size*mass_array
     return update
 
 
