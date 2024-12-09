@@ -56,7 +56,7 @@ def gen_outer_conditions():
 
 
 
-def halfway_diff(core_guess, extra_params, step_size, num_iter):
+def halfway_diff(core_guess, num_iter, extra_params, step_size):
     """
         Input:
             estimator_guess: 2x1 numpy array of the form [temp, pressure]. These should be unitless
@@ -73,13 +73,12 @@ def halfway_diff(core_guess, extra_params, step_size, num_iter):
     
     outwards = Integrator.ODESolver(gen_core_conditions(P_guess, T_guess, step_size, extra_params), num_iter, extra_params, False)
     inwards =  Integrator.ODESolver(gen_outer_conditions(), num_iter, extra_params, True)
-
-    return  np.sum(outwards[num_iter/2,:] - inwards[num_iter/2,:])
-
+    return  np.sum(outwards[num_iter//2,:] - inwards[num_iter//2,:])
 
 
 
-def run_minimizer(P_guess, T_guess, num_iters, M_0, R_0, L_0, E_0, kappa, mu):
+
+def run_minimizer(P_guess, T_guess, num_iters, step_size, M_0, R_0, L_0, E_0, kappa, mu):
     """
         Helper function: to generate set up the minimizer and run it
             Input:
@@ -99,11 +98,10 @@ def run_minimizer(P_guess, T_guess, num_iters, M_0, R_0, L_0, E_0, kappa, mu):
     extra_params = Utilities.generate_extra_parameters(M_0, R_0, L_0, E_0, kappa, mu)
 
     return sp.optimize.minimize(halfway_diff, core_guess,
-                                args=(solver,num_iters,extra_params),
-                                bounds=sp.optimize.Bounds( # Hopefully, prevent Minimizer from guessing a negative temperature...
-                                    lb=[Utilities.global_tolerance,Utilities.global_tolerance],
-                                    ub=[np.inf,np.inf], keep_feasible=[True,True]),
-                                )
+                                    args=(num_iters, extra_params, step_size),  # no need for 'solver' here unless it's used inside 'halfway_diff'
+                                    bounds=sp.optimize.Bounds(lb=[Utilities.global_tolerance, Utilities.global_tolerance], 
+                                    ub=[np.inf, np.inf], keep_feasible=[True, True]),)
+    
 
 if __name__ == "__main__":
     pass
