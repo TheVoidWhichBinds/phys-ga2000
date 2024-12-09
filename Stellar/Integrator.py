@@ -36,7 +36,7 @@ def derivative_calc(current, extra_const_params):
     return output
 
 
-def RK4(f, current, step_size, extra_const_params):
+def RK4(f, current, step_size, extra_const_params, inwards):
     """
     Straightforward implementation of RK4 algorithm
     Inputs:
@@ -62,9 +62,8 @@ def RK4(f, current, step_size, extra_const_params):
     # new_input = current+step_size*k3
     # k4 = f(new_input,extra_const_params)
     # update = (step_size/6) * (k1+2*k2+2*k3+k4)
-
     dependent_array = np.array([0,1,1,1,1,1])
-    mass_array = np.array([1,0,0,0,0,0])
+    mass_array = np.array([1,0,0,0,0,0])* (-1 if inwards else 1)
     k1 = step_size * f(current, extra_const_params)
     k2 = step_size * f(current + (k1/2)*dependent_array + (step_size/2)*mass_array, extra_const_params)
     k3 = step_size * f(current + (k2/2)*dependent_array + (step_size/2)*mass_array, extra_const_params)
@@ -73,12 +72,13 @@ def RK4(f, current, step_size, extra_const_params):
     return update
 
 
+
+
 if __name__ == "__main__":
     pass
 
-
 #Iterates state of system thru RK4, creating an array of the key variables at each mass step.
-def ODESolver(initial_conditions, num_steps, extra_const_parameters, verbose=False):
+def ODESolver(initial_conditions, num_iter, extra_const_parameters, inwards, verbose=False):
     """
         Inputs:
             initial_conditions (1x6 np array): The initial conditions of the system
@@ -88,31 +88,34 @@ def ODESolver(initial_conditions, num_steps, extra_const_parameters, verbose=Fal
                 The state of the system at each mass step in time. Needed for plotting reasons
                 The final state is given by state_matrix[:,-1]
     """
-    step_size = 1/num_steps
-    cur_state = initial_conditions
-    output = [initial_conditions]
-    for i in range(1, num_steps):
+    step_size = 1/num_iter #                 Why define step_size like this?
+    current = initial_conditions #         Why do we rename current to cur_state? Confusing
+    output = np.zeros((num_iter, 6))
+    output[0,:] = current
+
+    for i in range(1, num_iter):
         #RK4 receives a specific differential equation corresponding to each variable of interest. 
         #RK4 outputs a 6x1 array with elements of: mass, radius, pressure, luminosity, 
         #temperature, and density. Only the element corresponding to the differential equation (derivatives[n])
         #input into RK4 has the correct updated value
-        update  = RK4(derivative_calc, cur_state, step_size, extra_const_parameters)
+        update  = RK4(derivative_calc, current, step_size, extra_const_parameters, inwards)
         #
         if(verbose):
-            print(i, cur_state, update)
+            print(i, current, update)
         if(np.any(np.isnan(update))):
             break
         
         #cur_state = cur_state + delta #                naming this "delta" is misleading - RK4 outputs the new state, not the delta between states - renamed instances of "delta" to "update"
-        cur_state = update
-        cur_state[DENSITY_UNIT_INDEX] = equation_of_state(cur_state[PRESSURE_UNIT_INDEX], cur_state[TEMP_UNIT_INDEX], extra_const_parameters)
+        current = update
+        current[DENSITY_UNIT_INDEX] = equation_of_state(current[PRESSURE_UNIT_INDEX], current[TEMP_UNIT_INDEX], extra_const_parameters)
         
-        if(np.any(np.less(cur_state,0)) or (np.any(np.isnan(cur_state)))):
+        if(np.any(np.less(current,0)) or (np.any(np.isnan(current)))):
             break
-        output.append( copy.deepcopy(cur_state) )
-    #   print("End STEP: ", cur_state)
-    o = np.vstack(output)
-    return o
+        output[i,:] = current
+        #print(np.shape(output))
+        #print("End STEP: ", cur_state)
+    return output
 
-if __name__ == "__main__":
+
+if __name__ == "__main__": #                            Purpose of having this at the end?
     pass

@@ -1,7 +1,7 @@
 import numpy as np
 import scipy as sp
 import Integrator
-import Utilities 
+import Utilities
 
 #MASS_UNIT_INDEX = 0 []
 #RADIUS_UNIT_INDEX = 1 []
@@ -11,7 +11,7 @@ import Utilities
 #TEMP_UNIT_INDEX = 5 [K]
 
 
-def gen_initial_conditions(starting_scaled_temp, starting_scaled_pressure, step_size, extra_params):
+def gen_core_conditions(P_core, T_core, step_size, extra_params):
     """
         Input:
             Helper function to deal with the fact that we can't start at m=0. We pretend that the central density is roughly constant, then fudge the boundary conditions a bit
@@ -22,19 +22,41 @@ def gen_initial_conditions(starting_scaled_temp, starting_scaled_pressure, step_
         Output:
             1x6 numpy array containing initial conditions in scaled variables
     """
-    initial_density =  Utilities.equation_of_state(starting_scaled_pressure, starting_scaled_temp, extra_params)
-# encode the boundary conditions of m'= L' = r'=0, plug put in the initial temp and pressure guesses
-# We need to fudge the radius initial condition to avoid the singularity at r=0 in the equations.
-    initial_mass = step_size/2
-    initial_rad = np.power((4*np.pi/3)*initial_mass/initial_density, 1/3)
-    initial_conds = np.array(  (initial_mass, initial_rad, initial_density,
-                                starting_scaled_pressure , 0, starting_scaled_temp) )
-    return initial_conds
+    # We need to fudge the radius initial condition to avoid the singularity at r=0 in the equations.
+    rho_core =  Utilities.equation_of_state(P_core, T_core, extra_params)
+    M_core = step_size/10
+    R_core = np.power((4*np.pi/3)*M_core/rho_core, 1/3)
+    L_core = 0
+    core_conds = np.array([M_core, R_core, rho_core, P_core, L_core, T_core])
+    return core_conds
+
+
+
+def gen_outer_conditions():
+    """
+        Input:
+            Helper function to deal with the fact that we can't start at m=0. We pretend that the central density is roughly constant, then fudge the boundary conditions a bit
+            starting_scaled_temp: the initial scaled temperature at the center of the star (unitless)
+            starting_scaled_pressure: same as temp, but for pressure
+            step_size: the mass step size to be taken (typically, this should be half a step size of your actual simulation)
+            const_params: dictionary containing the constant parameters of the problem. Generated from Utilities.generate_extra_parameters
+        Output:
+            1x6 numpy array containing initial conditions in scaled variables
+    """
+    epsilon = 1E-4
+    rho_outer = epsilon
+    M_outer = 1
+    R_outer = 1
+    L_outer = 1
+    P_outer = 0
+    T_outer = epsilon
+    outer_conds = np.array((M_outer, R_outer, rho_outer, P_outer, L_outer, T_outer))
+    return outer_conds
 
 
 
 
-def loss_function(estimator_guess, *args):
+def halfway_diff(core_guess, extra_params, step_size, num_iter):
     """
         Input:
             estimator_guess: 2x1 numpy array of the form [temp, pressure]. These should be unitless
@@ -44,25 +66,20 @@ def loss_function(estimator_guess, *args):
     """
 # We assume that estimator has dimensions 2x1
 # Temperature and pressure normally can't be negative
-    initial_pressure  = estimator_guess[0]
-    initial_temp  = estimator_guess[1]
-#    assert(initial_pressure >= 0) 
-#    assert(initial_temp >= 0)
-# Want temperature and pressure to be 0 at boundaries. These variables are mostly just for clarity
-    expected_pressure = np.float64(0)
-    expected_temp = np.float64(0)
-# *args should of the form  [ODE solver,n_steps, extra_const_params]
-    assert(len(args) == 3)
-    solver, n_steps, const_params = args
-    initial_conds = gen_initial_conditions(initial_temp, initial_pressure, 1/n_steps, const_params)
-# use the ODE solver to propagate the initial conditions to the final state
-    time_evolution = solver(initial_conds, n_steps, const_params)
-    final_mass = time_evolution[-1,Utilities.MASS_UNIT_INDEX]  #                  Maybe kill this since it's unused.
-    final_pressure = time_evolution[-1,Utilities.PRESSURE_UNIT_INDEX]
-    final_temp = time_evolution[-1,Utilities.TEMP_UNIT_INDEX]
-    return   np.pow((final_pressure- expected_pressure),2) + np.pow(final_temp- expected_temp,2)
+    P_guess = core_guess[0]
+    T_guess = core_guess[1]
+    assert(P_guess >= 0) 
+    assert(T_guess >= 0)
+    
+    outwards = Integrator.ODESolver(gen_core_conditions(P_guess, T_guess, step_size, extra_params), num_iter, extra_params, False)
+    inwards =  Integrator.ODESolver(gen_outer_conditions(), num_iter, extra_params, True)
 
-def run_minimizer(Initial_scaled_T, Initial_scaled_P, num_iters, M_0, R_0, epsilon, kappa, mu):
+    return  np.sum(outwards[num_iter/2,:] - inwards[num_iter/2,:])
+
+
+
+
+def run_minimizer(P_guess, T_guess, num_iters, M_0, R_0, L_0, E_0, kappa, mu):
     """
         Helper function: to generate set up the minimizer and run it
             Input:
@@ -77,11 +94,12 @@ def run_minimizer(Initial_scaled_T, Initial_scaled_P, num_iters, M_0, R_0, epsil
         Output:
             OptimizeResult from scipy.optimize.minimize
     """
-    x0 = np.array([Initial_scaled_T, Initial_scaled_P])
+    core_guess = np.array([P_guess, T_guess])
     solver = Integrator.ODESolver
-    extra_const_params = Utilities.generate_extra_parameters(M_0, R_0, epsilon, kappa, mu)
-    return sp.optimize.minimize(loss_function,x0,
-                                args=(solver,num_iters,extra_const_params),
+    extra_params = Utilities.generate_extra_parameters(M_0, R_0, L_0, E_0, kappa, mu)
+
+    return sp.optimize.minimize(halfway_diff, core_guess,
+                                args=(solver,num_iters,extra_params),
                                 bounds=sp.optimize.Bounds( # Hopefully, prevent Minimizer from guessing a negative temperature...
                                     lb=[Utilities.global_tolerance,Utilities.global_tolerance],
                                     ub=[np.inf,np.inf], keep_feasible=[True,True]),

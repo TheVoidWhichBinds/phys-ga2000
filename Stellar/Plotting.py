@@ -37,11 +37,11 @@ def plot_variable(independent, dependent, title, filename, xlabel, ylabel, logx 
 
 
 if __name__ == "__main__":  # Main guard ensures this code runs only when the script is executed directly
-    step_size = 0.0001
-    scaling = UnitScalingFactors(M_sun, R_sun)
-    extra_params = generate_extra_parameters(M_sun, R_sun, E_0_sun, kappa_0_sun, mu_sun)
-    state0 = ODESolver(gen_initial_conditions(2E7/scaling[TEMP_UNIT_INDEX], 1E16/scaling[PRESSURE_UNIT_INDEX], step_size, extra_params), 1000, extra_params)
-    # state0 = np.loadtxt("SunMesh.txt", delimiter=",") # CHANGE THIS TO WHAT YOU NEED!
+    # step_size = 0.01
+    # scaling = UnitScalingFactors(M_sun, R_sun)
+    # extra_params = generate_extra_parameters(M_sun, R_sun, E_0_sun, kappa_0_sun, mu_sun)
+    # state0 = ODESolver(gen_initial_conditions(2E7/scaling[TEMP_UNIT_INDEX], 1E16/scaling[PRESSURE_UNIT_INDEX], step_size, extra_params), 10000, extra_params)
+    state0 = np.loadtxt("SunMesh.txt", delimiter=",") # CHANGE THIS TO WHAT YOU NEED!
     radius = state0[:,RADIUS_UNIT_INDEX] # state0 is a Nx6 2D numpy array
     #Extracting variables to be plotted over all 3 initial conditions and all mass steps.
     variables = [
