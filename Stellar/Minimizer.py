@@ -73,8 +73,15 @@ def halfway_diff(core_guess, num_iter, extra_params, step_size):
     
     outwards = Integrator.ODESolver(gen_core_conditions(P_guess, T_guess, step_size, extra_params), num_iter, extra_params, False)
     inwards =  Integrator.ODESolver(gen_outer_conditions(), num_iter, extra_params, True)
-    return  np.sum(outwards[num_iter//2,:] - inwards[num_iter//2,:])
-
+    diff = np.sum(outwards[num_iter//2,:] - inwards[num_iter//2,:])
+    diff_weight = 1
+    
+    core_conditions_solved = outwards[0,[0,1,4]]
+    outer_conditions_solved = inwards[0,:]
+    boundary = np.sum(np.abs(Utilities.global_tolerance*np.array([1,1,1]) - core_conditions_solved)  +  np.abs(np.array([1,1,0,0,1,0]) - outer_conditions_solved))
+    boundary_weight = 10
+    
+    return diff_weight*diff**2 + boundary_weight*bound_match
 
 
 
