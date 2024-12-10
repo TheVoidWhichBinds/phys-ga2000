@@ -25,26 +25,20 @@ def derivative_calc(current, extra_params):
     dL_dm = extra_params["E_0_prime"] * current[DENSITY_UNIT_INDEX] * np.power(current[TEMP_UNIT_INDEX],4)
     output[LUMINOSITY_UNIT_INDEX] = dL_dm
     
-    
-    term1 = log(extra_params["kappa_0_prime"])
-    term2 = log(current[LUMINOSITY_UNIT_INDEX])
-    term3 = log(current[DENSITY_UNIT_INDEX])
-    term4 = log(np.power(current[RADIUS_UNIT_INDEX],-4))
-    term5 = log(np.power(current[TEMP_UNIT_INDEX],-6.5))
-    
     dT_dm = - extra_params["kappa_0_prime"] * current[LUMINOSITY_UNIT_INDEX] * current[DENSITY_UNIT_INDEX] * np.power(current[RADIUS_UNIT_INDEX],-4) * np.power(current[TEMP_UNIT_INDEX],-6.5)
     output[TEMP_UNIT_INDEX] = dT_dm
     
-    if np.isnan(dT_dm):
-        print("Warning: dT/dm is NaN.")
-    elif dT_dm == np.inf:
-        print("Warning: dT/dm overflowed (positive infinity).")
-    elif dT_dm == -np.inf:
-        print("Warning: dT/dm overflowed (negative infinity).")
-    elif abs(dT_dm) < np.finfo(np.float64).tiny:  # Check for underflow (close to zero)
-        print(f"Warning: dT/dm underflowed (value: {dT_dm}).")
+    # if np.isnan(dT_dm):
+    #     print("Warning: dT/dm is NaN.")
+    # elif dT_dm == np.inf:
+    #     print("Warning: dT/dm overflowed (positive infinity).")
+    # elif dT_dm == -np.inf:
+    #     print("Warning: dT/dm overflowed (negative infinity).")
+    # elif abs(dT_dm) < np.finfo(np.float64).tiny:  # Check for underflow (close to zero)
+    #     print(f"Warning: dT/dm underflowed (value: {dT_dm}).")
     
     #print(dT_dm)
+    #print(dL_dm)
     return output
 
 
@@ -75,14 +69,16 @@ def RK4(f, current, step_size, extra_const_params, inwards):
     # new_input = current+step_size*k3
     # k4 = f(new_input,extra_const_params)
     # update = (step_size/6) * (k1+2*k2+2*k3+k4)
-    dependent_array = np.array([0,1,1,1,1,1]) * (-1 if inwards else 1)
+    dependent_array = np.array([0,1,1,1,1,1])
     mass_array = np.array([1,0,0,0,0,0]) * (-1 if inwards else 1)
     k1 = step_size * f(current, extra_const_params)
     k2 = step_size * f(current + (k1/2)*dependent_array + (step_size/2)*mass_array, extra_const_params)
     k3 = step_size * f(current + (k2/2)*dependent_array + (step_size/2)*mass_array, extra_const_params)
     k4 = step_size * f(current + k3*dependent_array + step_size*mass_array, extra_const_params)
     update = current + (1/6)*(k1+2*k2+2*k3+k4)*dependent_array + step_size*mass_array
-    print(curent[LUMINOSITY_UNIT_INDEX])
+    #print(current[LUMINOSITY_UNIT_INDEX])
+    #print(current[TEMP_UNIT_INDEX])
+    
     return update
 
 

@@ -11,11 +11,11 @@ M_sun = 1.989E30 # kg
 R_sun  = 6.9634E8 # m
 L_sun = 3.8E26 # W
 mu_sun = np.float64(0.6)
-E_0_sun = 0.241 # m^5/(kg s^3*K^4)
-kappa_0_sun = 3E-1 # m^2/kg
+E_0_sun = 1E-29 # m^5/(kg s^3*K^4)
+kappa_0_sun = 1E-1 # m^2/kg
 
 # Numerical Resolution used throughout the sim
-global_tolerance = 1E-2
+global_tolerance = 1E-6
 
 MASS_UNIT_INDEX = 0
 RADIUS_UNIT_INDEX = 1
