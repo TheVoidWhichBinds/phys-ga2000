@@ -42,17 +42,18 @@ if __name__ == "__main__":  # Main guard ensures this code runs only when the sc
     # extra_params = generate_extra_parameters(M_sun, R_sun, E_0_sun, kappa_0_sun, mu_sun)
     # state0 = ODESolver(gen_initial_conditions(2E7/scaling[TEMP_UNIT_INDEX], 1E16/scaling[PRESSURE_UNIT_INDEX], step_size, extra_params), 10000, extra_params)
     state0 = np.loadtxt("SunMesh.txt", delimiter=",") # CHANGE THIS TO WHAT YOU NEED!
-    radius = state0[:,RADIUS_UNIT_INDEX] # state0 is a Nx6 2D numpy array
     #Extracting variables to be plotted over all 3 initial conditions and all mass steps.
     variables = [
+    state0[:,MASS_UNIT_INDEX], #Mass
+    state0[:,RADIUS_UNIT_INDEX], #Radius
     state0[:,DENSITY_UNIT_INDEX], #Density
-    state0[:,TEMP_UNIT_INDEX], #Temperature
     state0[:,PRESSURE_UNIT_INDEX], #Pressure
     state0[:,LUMINOSITY_UNIT_INDEX], #Luminosity
+    state0[:,TEMP_UNIT_INDEX], #Temperature
                 ]
     labels = ['Density', 'Temperature', 'Pressure', 'Luminosity']
     units = ['g/cm³', 'K', 'Pa', 'W'] #Replace with actual units
-    plot_variable(radius, variables[0],'Stellar Radial Dependency of Density',"Density_R", 'Radius', 'log Density', logy =True, logx=False )
-    plot_variable(radius, variables[1],'Stellar Radial Dependency of Temperature',"Temp_R", 'Radius', 'log Temp', logy =True , logx=False)
-    plot_variable(radius, variables[2],'Stellar Radial Dependency of Pressure',"Pres_R", 'Radius', 'log Pressure', logy =True , logx=False)
-    plot_variable(radius, variables[3],'Stellar Radial Dependency of Luminosity',"Lum_R", 'Radius', 'log Luminosity', logy =True , logx=False)
+    plot_variable(variables[0], variables[DENSITY_UNIT_INDEX],'Stellar Mass Dependency of Density',"Density_R", 'Mass', 'log Density', logy =True, logx=False )
+    plot_variable(variables[0], variables[TEMP_UNIT_INDEX],'Stellar Mass Dependency of Temperature',"Temp_R", 'Mass', 'log Temp', logy =True , logx=False)
+    plot_variable(variables[0], variables[PRESSURE_UNIT_INDEX],'Stellar Mass Dependency of Pressure',"Pres_R", 'Mass', 'log Pressure', logy =True , logx=False)
+    plot_variable(variables[0], variables[LUMINOSITY_UNIT_INDEX],'Stellar Mass Dependency of Luminosity',"Lum_R", 'Mass', 'log Luminosity', logy =True , logx=False)

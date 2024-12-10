@@ -2,6 +2,7 @@ import numpy as np
 import scipy as sp;
 from Utilities import *
 import copy
+from math import log
 
 np.seterr(all='warn')
 # Derivatives of the dependent variables.
@@ -24,7 +25,7 @@ def derivative_calc(current, extra_params):
     dL_dm = extra_params["E_0_prime"] * current[DENSITY_UNIT_INDEX] * np.power(current[TEMP_UNIT_INDEX],4)
     output[LUMINOSITY_UNIT_INDEX] = dL_dm
     
-    dT_dm = - extra_params["kappa_0_prime"] * current[DENSITY_UNIT_INDEX] * current[LUMINOSITY_UNIT_INDEX] * np.power(current[RADIUS_UNIT_INDEX],-4) * np.power(current[TEMP_UNIT_INDEX],-6.5)
+    dT_dm = - extra_params["kappa_0_prime"] * current[LUMINOSITY_UNIT_INDEX] * current[DENSITY_UNIT_INDEX] * np.power(current[RADIUS_UNIT_INDEX],-4) * np.power(current[TEMP_UNIT_INDEX],-6.5)
     output[TEMP_UNIT_INDEX] = dT_dm
     return output
 
@@ -56,8 +57,8 @@ def RK4(f, current, step_size, extra_const_params, inwards):
     # new_input = current+step_size*k3
     # k4 = f(new_input,extra_const_params)
     # update = (step_size/6) * (k1+2*k2+2*k3+k4)
-    dependent_array = np.array([0,1,1,1,1,1])
-    mass_array = np.array([1,0,0,0,0,0])* (-1 if inwards else 1)
+    dependent_array = np.array([0,1,1,1,1,1]) * (-1 if inwards else 1)
+    mass_array = np.array([1,0,0,0,0,0]) * (-1 if inwards else 1)
     k1 = step_size * f(current, extra_const_params)
     k2 = step_size * f(current + (k1/2)*dependent_array + (step_size/2)*mass_array, extra_const_params)
     k3 = step_size * f(current + (k2/2)*dependent_array + (step_size/2)*mass_array, extra_const_params)
@@ -83,11 +84,11 @@ def ODESolver(initial_conditions, num_iter, extra_params, inwards, verbose=False
                 The state of the system at each mass step in time. Needed for plotting reasons
                 The final state is given by state_matrix[:,-1]
     """
-    step_size = 1/num_iter #                 Why define step_size like this?
-    current = initial_conditions #         Why do we rename current to cur_state? Confusing
+    step_size = 1/num_iter #Step size = unitless scale/num_iter
+    current = initial_conditions 
     output = np.zeros((num_iter, 6))
     output[0,:] = current
-
+    
     for i in range(1, num_iter):
         #RK4 receives a specific differential equation corresponding to each variable of interest. 
         #RK4 outputs a 6x1 array with elements of: mass, radius, pressure, luminosity, 
@@ -95,20 +96,21 @@ def ODESolver(initial_conditions, num_iter, extra_params, inwards, verbose=False
         #input into RK4 has the correct updated value
         update  = RK4(derivative_calc, current, step_size, extra_params, inwards)
         #
-        if(verbose):
-            print(i, current, update)
-        if(np.any(np.isnan(update))):
-            break
+        #if(verbose):
+            #print(i, current, update)
+        #if(np.any(np.isnan(update))):
+            #break
         
         #cur_state = cur_state + delta #                naming this "delta" is misleading - RK4 outputs the new state, not the delta between states - renamed instances of "delta" to "update"
         current = update
         current[DENSITY_UNIT_INDEX] = equation_of_state(current[PRESSURE_UNIT_INDEX], current[TEMP_UNIT_INDEX], extra_params)
         
-        if(np.any(np.less(current,0)) or (np.any(np.isnan(current)))):
-            break
+        # if(np.any(np.less(current,0)) or (np.any(np.isnan(current)))):
+        #     break
         output[i,:] = current
-        
-        #print("End STEP: ", cur_state)
+    
+    #print(np.shape(output[:,MASS_UNIT_INDEX]))
+    #print(np.shape(output))
     return output
 
 

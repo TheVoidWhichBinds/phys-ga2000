@@ -54,7 +54,7 @@ def gen_outer_conditions(L_outer):
 
 
 
-def halfway_diff(bound_guess, num_iter, extra_params, step_size):
+def smooth_merge(bound_guess, num_iter, extra_params, step_size):
     """
         Input:
             estimator_guess: 2x1 numpy array of the form [temp, pressure]. These should be unitless
@@ -73,6 +73,7 @@ def halfway_diff(bound_guess, num_iter, extra_params, step_size):
 
     outwards = Integrator.ODESolver(gen_core_conditions(P_core_guess, T_core_guess, step_size, extra_params), num_iter, extra_params, False)
     inwards =  Integrator.ODESolver(gen_outer_conditions(L_outer_guess), num_iter, extra_params, True)
+    print(inwards)
     diff = np.sum(outwards[num_iter//2,:] - inwards[num_iter//2,:])
     diff_weight = 1
     
@@ -80,7 +81,7 @@ def halfway_diff(bound_guess, num_iter, extra_params, step_size):
     outer_conditions_solved = inwards[0,:]
     #boundary = np.sum(np.abs(Utilities.global_tolerance*np.array([1,1,1]) - core_conditions_solved))  +  np.sum(np.abs(np.array([1,1,0,0,1,0]) - outer_conditions_solved))
     boundary_weight = 0
-    return diff_weight*diff**2 + boundary_weight#boundary
+    return diff_weight * diff**2 + boundary_weight#boundary
 
 
 
@@ -102,7 +103,7 @@ def run_minimizer(P_core_guess, T_core_guess, L_outer_guess, num_iters, step_siz
     bound_guess = np.array([P_core_guess, T_core_guess, L_outer_guess])
     extra_params = Utilities.generate_extra_parameters(M_0, R_0, E_0, kappa_0, mu)
 
-    return sp.optimize.minimize(halfway_diff, bound_guess,
+    return sp.optimize.minimize(smooth_merge, bound_guess,
                                     args=(num_iters, extra_params, step_size), 
                                     bounds=sp.optimize.Bounds(lb=[Utilities.global_tolerance,Utilities.global_tolerance,Utilities.global_tolerance], 
                                     ub=[np.inf,np.inf,np.inf], keep_feasible=[True, True,True]),)
