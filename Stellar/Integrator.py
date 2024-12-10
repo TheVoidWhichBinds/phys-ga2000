@@ -26,7 +26,6 @@ def derivative_calc(current, extra_params):
     
     dT_dm = - extra_params["kappa_0_prime"] * current[DENSITY_UNIT_INDEX] * current[LUMINOSITY_UNIT_INDEX] * np.power(current[RADIUS_UNIT_INDEX],-4) * np.power(current[TEMP_UNIT_INDEX],-6.5)
     output[TEMP_UNIT_INDEX] = dT_dm
-
     return output
 
 
@@ -74,7 +73,7 @@ if __name__ == "__main__":
     pass
 
 #Iterates state of system thru RK4, creating an array of the key variables at each mass step.
-def ODESolver(initial_conditions, num_iter, extra_const_parameters, inwards, verbose=False):
+def ODESolver(initial_conditions, num_iter, extra_params, inwards, verbose=False):
     """
         Inputs:
             initial_conditions (1x6 np array): The initial conditions of the system
@@ -94,7 +93,7 @@ def ODESolver(initial_conditions, num_iter, extra_const_parameters, inwards, ver
         #RK4 outputs a 6x1 array with elements of: mass, radius, pressure, luminosity, 
         #temperature, and density. Only the element corresponding to the differential equation (derivatives[n])
         #input into RK4 has the correct updated value
-        update  = RK4(derivative_calc, current, step_size, extra_const_parameters, inwards)
+        update  = RK4(derivative_calc, current, step_size, extra_params, inwards)
         #
         if(verbose):
             print(i, current, update)
@@ -103,12 +102,12 @@ def ODESolver(initial_conditions, num_iter, extra_const_parameters, inwards, ver
         
         #cur_state = cur_state + delta #                naming this "delta" is misleading - RK4 outputs the new state, not the delta between states - renamed instances of "delta" to "update"
         current = update
-        current[DENSITY_UNIT_INDEX] = equation_of_state(current[PRESSURE_UNIT_INDEX], current[TEMP_UNIT_INDEX], extra_const_parameters)
+        current[DENSITY_UNIT_INDEX] = equation_of_state(current[PRESSURE_UNIT_INDEX], current[TEMP_UNIT_INDEX], extra_params)
         
         if(np.any(np.less(current,0)) or (np.any(np.isnan(current)))):
             break
         output[i,:] = current
-        #print(np.shape(output))
+        
         #print("End STEP: ", cur_state)
     return output
 

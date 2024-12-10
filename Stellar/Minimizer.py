@@ -24,15 +24,15 @@ def gen_core_conditions(P_core, T_core, step_size, extra_params):
     """
     # We need to fudge the radius initial condition to avoid the singularity at r=0 in the equations.
     rho_core =  Utilities.equation_of_state(P_core, T_core, extra_params)
-    M_core = step_size/10
-    R_core = np.power((4*np.pi/3)*M_core/rho_core, 1/3)
-    L_core = 0
+    M_core = step_size/2
+    R_core = np.power((4*np.pi/3) * M_core / rho_core, 1/3)
+    L_core = Utilities.global_tolerance
     core_conds = np.array([M_core, R_core, rho_core, P_core, L_core, T_core])
     return core_conds
 
 
 
-def gen_outer_conditions():
+def gen_outer_conditions(L_outer):
     """
         Input:
             Helper function to deal with the fact that we can't start at m=0. We pretend that the central density is roughly constant, then fudge the boundary conditions a bit
@@ -46,7 +46,6 @@ def gen_outer_conditions():
     rho_outer = Utilities.global_tolerance
     M_outer = 1
     R_outer = 1
-    L_outer = 1
     P_outer = Utilities.global_tolerance
     T_outer = Utilities.global_tolerance
     outer_conds = np.array((M_outer, R_outer, rho_outer, P_outer, L_outer, T_outer))
@@ -55,7 +54,7 @@ def gen_outer_conditions():
 
 
 
-def halfway_diff(core_guess, num_iter, extra_params, step_size):
+def halfway_diff(bound_guess, num_iter, extra_params, step_size):
     """
         Input:
             estimator_guess: 2x1 numpy array of the form [temp, pressure]. These should be unitless
@@ -65,26 +64,27 @@ def halfway_diff(core_guess, num_iter, extra_params, step_size):
     """
 # We assume that estimator has dimensions 2x1
 # Temperature and pressure normally can't be negative
-    P_guess = core_guess[0]
-    T_guess = core_guess[1]
-    assert(P_guess >= 0) 
-    assert(T_guess >= 0)
-    
-    outwards = Integrator.ODESolver(gen_core_conditions(P_guess, T_guess, step_size, extra_params), num_iter, extra_params, False)
-    inwards =  Integrator.ODESolver(gen_outer_conditions(), num_iter, extra_params, True)
+    P_core_guess = bound_guess[0]
+    T_core_guess = bound_guess[1]
+    L_outer_guess = bound_guess[2]
+    assert(P_core_guess >= 0) 
+    assert(T_core_guess >= 0)
+    assert(L_outer_guess >= 0)
+
+    outwards = Integrator.ODESolver(gen_core_conditions(P_core_guess, T_core_guess, step_size, extra_params), num_iter, extra_params, False)
+    inwards =  Integrator.ODESolver(gen_outer_conditions(L_outer_guess), num_iter, extra_params, True)
     diff = np.sum(outwards[num_iter//2,:] - inwards[num_iter//2,:])
     diff_weight = 1
     
     core_conditions_solved = outwards[0,[0,1,4]]
     outer_conditions_solved = inwards[0,:]
-    boundary = np.sum(np.abs(Utilities.global_tolerance*np.array([1,1,1]) - core_conditions_solved))  +  np.sum(np.abs(np.array([1,1,0,0,1,0]) - outer_conditions_solved))
+    #boundary = np.sum(np.abs(Utilities.global_tolerance*np.array([1,1,1]) - core_conditions_solved))  +  np.sum(np.abs(np.array([1,1,0,0,1,0]) - outer_conditions_solved))
     boundary_weight = 0
-    
-    return diff_weight*diff**2 + boundary_weight*boundary
+    return diff_weight*diff**2 + boundary_weight#boundary
 
 
 
-def run_minimizer(P_guess, T_guess, num_iters, step_size, M_0, R_0, L_0, E_0, kappa, mu):
+def run_minimizer(P_core_guess, T_core_guess, L_outer_guess, num_iters, step_size, M_0, R_0, E_0, kappa_0, mu):
     """
         Helper function: to generate set up the minimizer and run it
             Input:
@@ -99,13 +99,13 @@ def run_minimizer(P_guess, T_guess, num_iters, step_size, M_0, R_0, L_0, E_0, ka
         Output:
             OptimizeResult from scipy.optimize.minimize
     """
-    core_guess = np.array([P_guess, T_guess])
-    extra_params = Utilities.generate_extra_parameters(M_0, R_0, L_0, E_0, kappa, mu)
+    bound_guess = np.array([P_core_guess, T_core_guess, L_outer_guess])
+    extra_params = Utilities.generate_extra_parameters(M_0, R_0, E_0, kappa_0, mu)
 
-    return sp.optimize.minimize(halfway_diff, core_guess,
-                                    args=(num_iters, extra_params, step_size),  # no need for 'solver' here unless it's used inside 'halfway_diff'
-                                    bounds=sp.optimize.Bounds(lb=[Utilities.global_tolerance, Utilities.global_tolerance], 
-                                    ub=[np.inf, np.inf], keep_feasible=[True, True]),)
+    return sp.optimize.minimize(halfway_diff, bound_guess,
+                                    args=(num_iters, extra_params, step_size), 
+                                    bounds=sp.optimize.Bounds(lb=[Utilities.global_tolerance,Utilities.global_tolerance,Utilities.global_tolerance], 
+                                    ub=[np.inf,np.inf,np.inf], keep_feasible=[True, True,True]),)
     
 
 if __name__ == "__main__":

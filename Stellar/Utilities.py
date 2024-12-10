@@ -26,7 +26,7 @@ TEMP_UNIT_INDEX = 5
 #TIME_UNIT_INDEX = 6 #                             We are currently never using this - Kill?
 
 
-def UnitScalingFactors(M_0, R_0, L_0):
+def UnitScalingFactors(M_0, R_0):
     """
     Returns the scaling factors to convert the unitless 
     numbers in the sim to physical units.
@@ -40,26 +40,19 @@ def UnitScalingFactors(M_0, R_0, L_0):
     assert(R_0 > 0)
     assert(M_0 > 0)
     #The "out" variables are the coefficients which multiply the scaled variables and generate the orignal unit variables.
-    R_out = np.float64(R_0)
-    M_out = np.float64(M_0)
-    L_out = np.float64(L_0)
-    rho_out = M_0/(np.power(R_0,3))
-    t_0 = np.sqrt(np.power(R_0,3) / (G*M_0))
-    P_out = M_0/(R_0*np.power(t_0,2))
-    T_out = (m_p*np.power(R_0,2)) / (np.power(t_0,2)*Boltzman) # Integrator uses
-    return np.array([
-            M_out,
-            R_out,
-            rho_out,
-            P_out,
-            L_out,
-            T_out,
-            t_0
-        ])
+    M_0 = np.float64(M_0)
+    R_0 = np.float64(R_0)
+    rho_0 = np.float64(M_0 / (R_0**3))
+    t_0 = np.float64(np.sqrt((R_0**3) / (G*M_0)))
+    P_0 = np.float64(M_0 / (R_0 * t_0**2))
+    L_0 = np.float64(M_0 * R_0**2 / (t_0**3))
+    T_0 = np.float64(m_p * R_0**2 / (t_0**2 * Boltzman))
+
+    return np.array([M_0, R_0, rho_0, P_0, L_0, T_0, t_0])
 
 
 
-def generate_extra_parameters(M_0, R_0, L_0, E_0, kappa_0, mu):
+def generate_extra_parameters(M_0, R_0, E_0, kappa_0, mu):
     """
         Given the unitful parameters of the problem, generate the unitless constants to be used in the simulation
     Inputs:
@@ -71,7 +64,7 @@ def generate_extra_parameters(M_0, R_0, L_0, E_0, kappa_0, mu):
     Output:
         extra_const_params: python dictionary containing the converted constant parameters
     """
-    _,_,rho_0,P_0,L_0,T_0,t_0 = UnitScalingFactors(M_0, R_0, L_0)
+    _,_, rho_0, P_0, L_0, T_0, t_0 = UnitScalingFactors(M_0, R_0)
     
     E_0_prime = E_0 * t_0**3 * M_0 * T_0**4 * np.power(R_0,-5)
     kappa_0_prime = kappa_0 * 3 * M_0**3 / ((16*np.pi)**2 * StefanBoltz * R_0**5 * np.power(T_0,7.5) * np.power(t_0,3))

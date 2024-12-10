@@ -8,15 +8,16 @@ if __name__ == "__main__":
     # Run the sun test
     num_iter = 1000
     step_size = 1/num_iter
-    scale_factors = UnitScalingFactors(M_sun, R_sun, L_sun)
-    extra_params = generate_extra_parameters(M_sun, R_sun, L_sun, E_0_sun, kappa_0_sun, mu_sun)
+    scale_factors = UnitScalingFactors(M_sun, R_sun)
+    extra_params = generate_extra_parameters(M_sun, R_sun, E_0_sun, kappa_0_sun, mu_sun)
 
     #print("Extra:", constants)
-    optimal_core = run_minimizer(1E16/scale_factors[PRESSURE_UNIT_INDEX],1E7/scale_factors[TEMP_UNIT_INDEX], num_iter, step_size, M_sun, R_sun, L_sun, 
-                                       extra_params["E_0_prime"], extra_params["kappa_0_prime"], extra_params["mu"])
+    optimal_init = run_minimizer(1E16/scale_factors[PRESSURE_UNIT_INDEX],1E7/scale_factors[TEMP_UNIT_INDEX], 
+                                L_sun/scale_factors[LUMINOSITY_UNIT_INDEX], num_iter, step_size, M_sun, R_sun, 
+                                extra_params["E_0_prime"], extra_params["kappa_0_prime"], extra_params["mu"])
 
-    core_initial = gen_core_conditions(optimal_core.x[0], optimal_core.x[1], step_size, extra_params) 
-    outer_initial = gen_outer_conditions()
+    core_initial = gen_core_conditions(optimal_init.x[0], optimal_init.x[1], step_size, extra_params) 
+    outer_initial = gen_outer_conditions(optimal_init.x[2])
     outwards_sol = ODESolver(core_initial, num_iter, extra_params, False)
     inwards_sol = ODESolver(outer_initial, num_iter, extra_params, True)
     
