@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
     #print("Extra:", constants)
     optimal_core = run_minimizer(1E16/scale_factors[PRESSURE_UNIT_INDEX],1E7/scale_factors[TEMP_UNIT_INDEX], num_iter, step_size, M_sun, R_sun, L_sun, 
-                                       extra_params["E_prime"], extra_params["kappa_prime"], extra_params["mu"])
+                                       extra_params["E_0_prime"], extra_params["kappa_0_prime"], extra_params["mu"])
 
     core_initial = gen_core_conditions(optimal_core.x[0], optimal_core.x[1], step_size, extra_params) 
     outer_initial = gen_outer_conditions()

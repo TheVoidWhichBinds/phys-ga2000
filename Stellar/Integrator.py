@@ -15,25 +15,20 @@ def derivative_calc(current, extra_params):
         Output: 1x6 numpy array stating change in each variable
     """
     output = np.zeros(current.shape)
-    dR_dm = (1/(4*np.pi)) * np.power(current[RADIUS_UNIT_INDEX],-2) * np.power(current[DENSITY_UNIT_INDEX],-1)
+    dr_dm = (1/(4*np.pi)) * np.power(current[RADIUS_UNIT_INDEX],-2) * np.power(current[DENSITY_UNIT_INDEX],-1)
     output[RADIUS_UNIT_INDEX] = dr_dm
 
-    dP_dm = (-1/(4*np.pi)) * (current[MASS_UNIT_INDEX]) * np.power(current[RADIUS_UNIT_INDEX],-4)
+    dP_dm = (-1/(4*np.pi)) * current[MASS_UNIT_INDEX] * np.power(current[RADIUS_UNIT_INDEX],-4)
     output[PRESSURE_UNIT_INDEX] = dP_dm
 
-    new_L = extra_params["E_0_prime"] * current[DENSITY_UNIT_INDEX] * np.power(current[TEMP_UNIT_INDEX],4)
-    output[LUMINOSITY_UNIT_INDEX] = new_L
+    dL_dm = extra_params["E_0_prime"] * current[DENSITY_UNIT_INDEX] * np.power(current[TEMP_UNIT_INDEX],4)
+    output[LUMINOSITY_UNIT_INDEX] = dL_dm
+    
+    dT_dm = - extra_params["kappa_0_prime"] * current[DENSITY_UNIT_INDEX] * current[LUMINOSITY_UNIT_INDEX] * np.power(current[RADIUS_UNIT_INDEX],-4) * np.power(current[TEMP_UNIT_INDEX],-6.5)
+    output[TEMP_UNIT_INDEX] = dT_dm
 
-    #assume that kappa_prime is in args
-    cur_t = current[TEMP_UNIT_INDEX]
-    multiplied_vars = cur_t* current[RADIUS_UNIT_INDEX]
-    var = np.power(multiplied_vars, -4)
-    tp = np.power(cur_t,-2.5) #!!!                   OVERFLOW/NaN being encountered               !!!
-    new_T = - extra_const_params["kappa_prime"]* current[DENSITY_UNIT_INDEX] * current[LUMINOSITY_UNIT_INDEX] 
-    output[TEMP_UNIT_INDEX] = new_T
-    output[MASS_UNIT_INDEX] = 0 #Mass and density updated in RK4 and ODESolver so we make their change here = 0.
-    output[DENSITY_UNIT_INDEX] = 0
     return output
+
 
 
 def RK4(f, current, step_size, extra_const_params, inwards):

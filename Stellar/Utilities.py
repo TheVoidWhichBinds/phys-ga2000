@@ -59,7 +59,7 @@ def UnitScalingFactors(M_0, R_0, L_0):
 
 
 
-def generate_extra_parameters(M_0, R_0, L_0, E_0, kappa, mu):
+def generate_extra_parameters(M_0, R_0, L_0, E_0, kappa_0, mu):
     """
         Given the unitful parameters of the problem, generate the unitless constants to be used in the simulation
     Inputs:
@@ -71,19 +71,12 @@ def generate_extra_parameters(M_0, R_0, L_0, E_0, kappa, mu):
     Output:
         extra_const_params: python dictionary containing the converted constant parameters
     """
-    _,_,rho0,P0,L0,T0,t0 = UnitScalingFactors(M_0, R_0, L_0)
+    _,_,rho_0,P_0,L_0,T_0,t_0 = UnitScalingFactors(M_0, R_0, L_0)
     
-    E_0_prime = E_0 * np.power(R_0,-5)*M_0*np.power(T0,4)*np.power(t0,3)
-
-    kappa_prefactor = np.power(M_0,2)*np.power(R_0,-5)*np.power(T0,-3.5)
-    kappa_const_prefactor = (3/(16*StefanBoltz*np.power(4*np.pi,2) ))
-    kappa_0_prime = kappa_const_prefactor*kappa/kappa_prefactor
-
-    extra_params = {
-        "mu": mu,
-    "E_0_prime": E_0_prime,
-    "kappa_0_prime": kappa_0_prime,
-    }
+    E_0_prime = E_0 * t_0**3 * M_0 * T_0**4 * np.power(R_0,-5)
+    kappa_0_prime = kappa_0 * 3 * M_0**3 / ((16*np.pi)**2 * StefanBoltz * R_0**5 * np.power(T_0,7.5) * np.power(t_0,3))
+    extra_params = {"mu": mu, "E_0_prime": E_0_prime, "kappa_0_prime": kappa_0_prime}
+    
     return extra_params
 
 
