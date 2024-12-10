@@ -25,8 +25,26 @@ def derivative_calc(current, extra_params):
     dL_dm = extra_params["E_0_prime"] * current[DENSITY_UNIT_INDEX] * np.power(current[TEMP_UNIT_INDEX],4)
     output[LUMINOSITY_UNIT_INDEX] = dL_dm
     
+    
+    term1 = log(extra_params["kappa_0_prime"])
+    term2 = log(current[LUMINOSITY_UNIT_INDEX])
+    term3 = log(current[DENSITY_UNIT_INDEX])
+    term4 = log(np.power(current[RADIUS_UNIT_INDEX],-4))
+    term5 = log(np.power(current[TEMP_UNIT_INDEX],-6.5))
+    
     dT_dm = - extra_params["kappa_0_prime"] * current[LUMINOSITY_UNIT_INDEX] * current[DENSITY_UNIT_INDEX] * np.power(current[RADIUS_UNIT_INDEX],-4) * np.power(current[TEMP_UNIT_INDEX],-6.5)
     output[TEMP_UNIT_INDEX] = dT_dm
+    
+    if np.isnan(dT_dm):
+        print("Warning: dT/dm is NaN.")
+    elif dT_dm == np.inf:
+        print("Warning: dT/dm overflowed (positive infinity).")
+    elif dT_dm == -np.inf:
+        print("Warning: dT/dm overflowed (negative infinity).")
+    elif abs(dT_dm) < np.finfo(np.float64).tiny:  # Check for underflow (close to zero)
+        print(f"Warning: dT/dm underflowed (value: {dT_dm}).")
+    
+    #print(dT_dm)
     return output
 
 
@@ -64,7 +82,7 @@ def RK4(f, current, step_size, extra_const_params, inwards):
     k3 = step_size * f(current + (k2/2)*dependent_array + (step_size/2)*mass_array, extra_const_params)
     k4 = step_size * f(current + k3*dependent_array + step_size*mass_array, extra_const_params)
     update = current + (1/6)*(k1+2*k2+2*k3+k4)*dependent_array + step_size*mass_array
-    #print(update)
+    print(curent[LUMINOSITY_UNIT_INDEX])
     return update
 
 
@@ -89,8 +107,9 @@ def ODESolver(initial_conditions, num_iter, extra_params, inwards, verbose=False
     output = np.zeros((num_iter, 6))
     output[0,:] = current
     
-    inwards_deriv = None
-    outwards_deriv = None
+    outwards_deriv = np.zeros((1,6))
+    inwards_deriv = np.zeros((1,6))
+
     for i in range(1, num_iter):
         #RK4 receives a specific differential equation corresponding to each variable of interest. 
         #RK4 outputs a 6x1 array with elements of: mass, radius, pressure, luminosity, 
@@ -104,16 +123,21 @@ def ODESolver(initial_conditions, num_iter, extra_params, inwards, verbose=False
                 outwards_deriv = derivative_calc(current, extra_params)
             
         update  = RK4(derivative_calc, current, step_size, extra_params, inwards)
-        #if(verbose):
-            #print(i, current, update)
-        #if(np.any(np.isnan(update))):
-            #break
         
-        #cur_state = cur_state + delta #                naming this "delta" is misleading - RK4 outputs the new state, not the delta between states - renamed instances of "delta" to "update"
+        if np.any(np.isnan(update)):
+            if verbose:
+                print(f"Iteration {i}: NaN encountered in update, stopping integration.")
+            break
+        if np.any(np.less(current, 0)) or np.any(np.isnan(current)):
+            if verbose:
+                print(f"Invalid state encountered: {current}")
+            return output, None, None
+
+        
         current = update
         current[DENSITY_UNIT_INDEX] = equation_of_state(current[PRESSURE_UNIT_INDEX], current[TEMP_UNIT_INDEX], extra_params)
-        # if(np.any(np.less(current,0)) or (np.any(np.isnan(current)))):
-        #     break
+        if(np.any(np.less(current,0)) or (np.any(np.isnan(current)))):
+             return output, None, None
         output[i,:] = current
     #print(output)
     return output, inwards_deriv, outwards_deriv
