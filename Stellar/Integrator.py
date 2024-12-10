@@ -89,13 +89,21 @@ def ODESolver(initial_conditions, num_iter, extra_params, inwards, verbose=False
     output = np.zeros((num_iter, 6))
     output[0,:] = current
     
+    inwards_deriv = None
+    outwards_deriv = None
     for i in range(1, num_iter):
         #RK4 receives a specific differential equation corresponding to each variable of interest. 
         #RK4 outputs a 6x1 array with elements of: mass, radius, pressure, luminosity, 
         #temperature, and density. Only the element corresponding to the differential equation (derivatives[n])
         #input into RK4 has the correct updated value
+        
+        if i == num_iter//2:
+            if inwards:
+                inwards_deriv = derivative_calc(current, extra_params)
+            else:
+                outwards_deriv = derivative_calc(current, extra_params)
+            
         update  = RK4(derivative_calc, current, step_size, extra_params, inwards)
-        #
         #if(verbose):
             #print(i, current, update)
         #if(np.any(np.isnan(update))):
@@ -104,14 +112,11 @@ def ODESolver(initial_conditions, num_iter, extra_params, inwards, verbose=False
         #cur_state = cur_state + delta #                naming this "delta" is misleading - RK4 outputs the new state, not the delta between states - renamed instances of "delta" to "update"
         current = update
         current[DENSITY_UNIT_INDEX] = equation_of_state(current[PRESSURE_UNIT_INDEX], current[TEMP_UNIT_INDEX], extra_params)
-        
         # if(np.any(np.less(current,0)) or (np.any(np.isnan(current)))):
         #     break
         output[i,:] = current
-    
-    #print(np.shape(output[:,MASS_UNIT_INDEX]))
-    #print(np.shape(output))
-    return output
+    #print(output)
+    return output, inwards_deriv, outwards_deriv
 
 
 if __name__ == "__main__": #                            Purpose of having this at the end?
