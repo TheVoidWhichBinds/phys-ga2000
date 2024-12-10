@@ -46,7 +46,7 @@ def UnitScalingFactors(M_0, R_0, L_0):
     rho_out = M_0/(np.power(R_0,3))
     t_0 = np.sqrt(np.power(R_0,3) / (G*M_0))
     P_out = M_0/(R_0*np.power(t_0,2))
-    T_out = (m_p*np.power(R_0,2)) / (np.power(t_0,2)*Boltzman) # Definition for T_out 
+    T_out = (m_p*np.power(R_0,2)) / (np.power(t_0,2)*Boltzman) # Integrator uses
     return np.array([
             M_out,
             R_out,
