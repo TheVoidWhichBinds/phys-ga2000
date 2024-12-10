@@ -78,6 +78,7 @@ def RK4(f, current, step_size, extra_const_params, inwards):
     k3 = step_size * rev * f(current + (k2/2)*dependent_array + rev*(step_size/2)*mass_array, extra_const_params)
     k4 = step_size * rev * f(current + k3*dependent_array + rev*step_size*mass_array, extra_const_params)
     update = current + (1/6)*(k1+2*k2+2*k3+k4) * dependent_array + rev * step_size * mass_array
+   
     #print(current[LUMINOSITY_UNIT_INDEX])
     #print(current[TEMP_UNIT_INDEX])
     
