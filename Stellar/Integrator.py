@@ -69,13 +69,15 @@ def RK4(f, current, step_size, extra_const_params, inwards):
     # new_input = current+step_size*k3
     # k4 = f(new_input,extra_const_params)
     # update = (step_size/6) * (k1+2*k2+2*k3+k4)
+    rev = -1 if inwards else 1
     dependent_array = np.array([0,1,1,1,1,1])
-    mass_array = np.array([1,0,0,0,0,0]) * (-1 if inwards else 1)
-    k1 = step_size * f(current, extra_const_params)
-    k2 = step_size * f(current + (k1/2)*dependent_array + (step_size/2)*mass_array, extra_const_params)
-    k3 = step_size * f(current + (k2/2)*dependent_array + (step_size/2)*mass_array, extra_const_params)
-    k4 = step_size * f(current + k3*dependent_array + step_size*mass_array, extra_const_params)
-    update = current + (1/6)*(k1+2*k2+2*k3+k4)*dependent_array + step_size*mass_array
+    mass_array = np.array([1,0,0,0,0,0])
+    
+    k1 = step_size * rev * f(current, extra_const_params)
+    k2 = step_size * rev * f(current + (k1/2)*dependent_array + rev*(step_size/2)*mass_array, extra_const_params)
+    k3 = step_size * rev * f(current + (k2/2)*dependent_array + rev*(step_size/2)*mass_array, extra_const_params)
+    k4 = step_size * rev * f(current + k3*dependent_array + rev*step_size*mass_array, extra_const_params)
+    update = current + (1/6)*(k1+2*k2+2*k3+k4) * dependent_array + rev * step_size * mass_array
     #print(current[LUMINOSITY_UNIT_INDEX])
     #print(current[TEMP_UNIT_INDEX])
     
