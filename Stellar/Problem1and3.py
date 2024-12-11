@@ -12,7 +12,7 @@ if __name__ == "__main__":
     extra_params = generate_extra_parameters(M_sun, R_sun, E_0_sun, kappa_0_sun, mu_sun)
 
     core_guess = gen_core_guess(1E16, 1E7, extra_params)
-    outer_guess = gen_outer_guess(L_sun)
+    outer_guess = gen_outer_guess(R_sun,L_sun)
 
     # optimal_init = run_minimizer(core_guess, outer_guess, num_iter, step_size, M_sun, R_sun, 
     #                                 E_0_sun, kappa_0_sun, mu_sun)
