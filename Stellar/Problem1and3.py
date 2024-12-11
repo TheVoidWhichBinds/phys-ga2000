@@ -20,16 +20,12 @@ if __name__ == "__main__":
     outer_initial = gen_outer_conditions(optimal_init.x[2])
     outwards_sol,_,_ = ODESolver(core_initial, num_iter, extra_params, False)
     inwards_sol,_,_ = ODESolver(outer_initial, num_iter, extra_params, True)
-    state_sun = np.append(outwards_sol[0:num_iter//2, :], np.flipud(inwards_sol[0:num_iter//2, :]), axis=0)
-    
+    #state_sun = np.append(outwards_sol[0:num_iter//2, :], np.flipud(inwards_sol[0:num_iter//2, :]), axis=0)
+    state_sun = np.append(outwards_sol, np.flipud(inwards_sol), axis=0)
     # core_initial = gen_core_conditions(1E17/scale_factors[PRESSURE_UNIT_INDEX], 1E7/scale_factors[TEMP_UNIT_INDEX], step_size, extra_params)
     # outer_initial = gen_outer_conditions(L_sun/scale_factors[LUMINOSITY_UNIT_INDEX])
     # outwards_sol,_,_ = ODESolver(core_initial, num_iter, extra_params, False)
     # inwards_sol,_,_ = ODESolver(outer_initial, num_iter, extra_params, True)
     # state_sun = inwards_sol
     
-    plt.figure()
-    plt.plot(inwards_sol[:, MASS_UNIT_INDEX], inwards_sol[:,PRESSURE_UNIT_INDEX])
-    plt.plot(outwards_sol[:, MASS_UNIT_INDEX], outwards_sol[:,PRESSURE_UNIT_INDEX])
-    plt.savefig("PvM")
     np.savetxt("SunMesh.txt", state_sun, delimiter=",")

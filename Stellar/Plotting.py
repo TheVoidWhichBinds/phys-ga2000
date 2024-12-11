@@ -53,7 +53,8 @@ if __name__ == "__main__":  # Main guard ensures this code runs only when the sc
                 ]
     labels = ['Density', 'Temperature', 'Pressure', 'Luminosity']
     units = ['g/cm³', 'K', 'Pa', 'W'] #Replace with actual units
-    plot_variable(variables[0], variables[DENSITY_UNIT_INDEX],'Stellar Mass Dependency of Density',"Density_R", 'Mass', 'log Density', logy =True, logx=False )
-    plot_variable(variables[0], variables[TEMP_UNIT_INDEX],'Stellar Mass Dependency of Temperature',"Temp_R", 'Mass', 'log Temp', logy =True , logx=False)
-    plot_variable(variables[0], variables[PRESSURE_UNIT_INDEX],'Stellar Mass Dependency of Pressure',"Pres_R", 'Mass', 'log Pressure', logy =True , logx=False)
-    plot_variable(variables[0], variables[LUMINOSITY_UNIT_INDEX],'Stellar Mass Dependency of Luminosity',"Lum_R", 'Mass', 'log Luminosity', logy =True , logx=False)
+    plot_variable(variables[0], variables[RADIUS_UNIT_INDEX], 'Stellar Mass Dependency of Radius',"Z_RM", 'Mass,', 'log Radius', logy =True, logx=False )
+    plot_variable(variables[0], variables[DENSITY_UNIT_INDEX],'Stellar Mass Dependency of Density',"Z_rhoM", 'Mass', 'log Density', logy =True, logx=False )
+    plot_variable(variables[0], variables[TEMP_UNIT_INDEX],'Stellar Mass Dependency of Temperature',"Z_TM", 'Mass', 'log Temp', logy =True , logx=False)
+    plot_variable(variables[0], variables[PRESSURE_UNIT_INDEX],'Stellar Mass Dependency of Pressure',"Z_PM", 'Mass', 'log Pressure', logy =True , logx=False)
+    plot_variable(variables[0], variables[LUMINOSITY_UNIT_INDEX],'Stellar Mass Dependency of Luminosity',"Z_LM", 'Mass', 'log Luminosity', logy =True , logx=False)
