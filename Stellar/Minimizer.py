@@ -115,7 +115,6 @@ def run_minimizer(core_guess, outer_guess, num_iters, step_size, M_0, R_0, E_0, 
     {'type': 'ineq', 'fun': lambda x: x[10] - 1E-9}, #All elements of x must be positive
     {'type': 'ineq', 'fun': lambda x: x[11] - 1E-9}, #All elements of x must be positive
     {'type': 'eq', 'fun': lambda x: x[6] - 1}, #Outer mass starts at 1
-    {'type': 'eq', 'fun': lambda x: x[7] - 1} #Outer radius starts at 1
                 )
 
     return sp.optimize.minimize(smooth_merge, bound_guess,
