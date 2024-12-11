@@ -15,11 +15,12 @@ if __name__ == "__main__":
     outer_guess = gen_outer_conditions(L_sun)
 
     optimal_init = run_minimizer(core_guess, outer_guess, num_iter, step_size, M_sun, R_sun, 
-                                extra_params["E_0_prime"], extra_params["kappa_0_prime"], extra_params["mu"])
-
+                                    extra_params["E_0_prime"], extra_params["kappa_0_prime"], extra_params["mu"])
+    core_opt = optimal_init.x[:6]
+    outer_opt = optimal_init.x[6:]
     
-    outwards_sol,_,_ = ODESolver(optimal_init.x[0], num_iter, extra_params, False)
-    inwards_sol,_,_ = ODESolver(optimal_init.x[1], num_iter, extra_params, True)
+    outwards_sol,_,_ = ODESolver(core_opt, num_iter, extra_params, False)
+    inwards_sol,_,_ = ODESolver(outer_opt, num_iter, extra_params, True)
     #state_sun = np.append(outwards_sol[0:num_iter//2, :], np.flipud(inwards_sol[0:num_iter//2, :]), axis=0)
     state_sun = np.append(outwards_sol, np.flipud(inwards_sol), axis=0)
     # core_initial = gen_core_conditions(1E17/scale_factors[PRESSURE_UNIT_INDEX], 1E7/scale_factors[TEMP_UNIT_INDEX], step_size, extra_params)
