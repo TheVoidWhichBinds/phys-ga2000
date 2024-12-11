@@ -104,7 +104,7 @@ def run_minimizer(core_guess, outer_guess, num_iters, step_size, M_0, R_0, E_0, 
     strict = (
     {'type': 'ineq', 'fun': lambda x: 1E-3 - bound_guess[0]}, #Core mass
     {'type': 'ineq', 'fun': lambda x: 1E-3 - bound_guess[1]}, #Core radius
-    {'type': 'ineq', 'fun': lambda x: 1E-3 - bound_guess[LUMINOSITY_UNIT_INDEX]}, #Core luminosity
+    {'type': 'ineq', 'fun': lambda x: 1E-3 - bound_guess[4]}, #Core luminosity
     {'type': 'ineq', 'fun': lambda x: 1.1 - bound_guess[6]}, #Outer mass
     {'type': 'ineq', 'fun': lambda x: bound_guess[6] - 1E-1}, #Outer mass
     {'type': 'ineq', 'fun': lambda x: 1.1 - bound_guess[7]}, #Outer radius
