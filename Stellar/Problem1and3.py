@@ -19,7 +19,8 @@ if __name__ == "__main__":
     core_opt = optimal_init.x[:6]
     outer_opt = optimal_init.x[6:]
 
-
+    print(core_opt)
+    print(outer_opt)
     
     outwards_sol,_,_ = ODESolver(core_opt, num_iter, extra_params, False)
     inwards_sol,_,_ = ODESolver(outer_opt, num_iter, extra_params, True)
