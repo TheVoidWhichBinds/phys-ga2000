@@ -23,13 +23,12 @@ def gen_core_guess(P_core, T_core, extra_params):
             1x6 numpy array containing initial conditions in scaled variables
     """
     # We need to fudge the radius initial condition to avoid the singularity at r=0 in the equations.
-    rho_core = equation_of_state(P_core, T_core, extra_params)
+    rho_core = extra_params["mu_prime"] * P_core / T_core
     M_core = global_tolerance
     R_core = global_tolerance
     L_core = global_tolerance
     core_conds = np.array([M_core, R_core, rho_core, P_core, L_core, T_core])
     return core_conds
-
 
 
 def gen_outer_guess(L_outer):
@@ -103,27 +102,26 @@ def run_minimizer(core_guess, outer_guess, num_iters, step_size, M_0, R_0, E_0, 
 
     strict = (
     {'type': 'ineq', 'fun': lambda x: x[0] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[1] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[2] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[3] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[4] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[5] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[6] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[7] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[8] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[9] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[10] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[11] - 1E-9}, #All elements of x must be positive
+    # {'type': 'ineq', 'fun': lambda x: x[1] - 1E-9}, #All elements of x must be positive
+    # {'type': 'ineq', 'fun': lambda x: x[2] - 1E-9}, #All elements of x must be positive
+    # {'type': 'ineq', 'fun': lambda x: x[3] - 1E-9}, #All elements of x must be positive
+    # {'type': 'ineq', 'fun': lambda x: x[4] - 1E-9}, #All elements of x must be positive
+    # {'type': 'ineq', 'fun': lambda x: x[5] - 1E-9}, #All elements of x must be positive
+    # {'type': 'ineq', 'fun': lambda x: x[6] - 1E-9}, #All elements of x must be positive
+    # {'type': 'ineq', 'fun': lambda x: x[7] - 1E-9}, #All elements of x must be positive
+    # {'type': 'ineq', 'fun': lambda x: x[8] - 1E-9}, #All elements of x must be positive
+    # {'type': 'ineq', 'fun': lambda x: x[9] - 1E-9}, #All elements of x must be positive
+    # {'type': 'ineq', 'fun': lambda x: x[10] - 1E-9}, #All elements of x must be positive
+    # {'type': 'ineq', 'fun': lambda x: x[11] - 1E-9}, #All elements of x must be positive
     {'type': 'eq', 'fun': lambda x: x[6] - 1}, #Outer mass starts at 1
     {'type': 'eq', 'fun': lambda x: x[7] - 1} #Outer radius starts at 1
     
                 )
 
     return sp.optimize.minimize(smooth_merge, bound_guess,
-                                    args=(num_iters, extra_params, step_size), 
-                                    bounds=sp.optimize.Bounds(lb = global_tolerance * np.ones(12), 
+                                    args=(num_iters, extra_params, step_size), bounds=sp.optimize.Bounds(lb = global_tolerance * np.ones(12), 
                                     ub = np.inf * np.ones(12), keep_feasible = True * np.ones(12)), 
-                                    constraints = strict
+                                    constraints = strict, tol = 1e-9
                                 )
     
 

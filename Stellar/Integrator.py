@@ -106,19 +106,16 @@ def ODESolver(initial_conditions, num_iter, extra_params, inwards, verbose=False
                 The final state is given by state_matrix[:,-1]
     """
     step_size = 1/num_iter #Step size = unitless scale/num_iter
-    current = initial_conditions 
-    output = np.zeros((num_iter, 6))
-    output[0,:] = current
-    
+    scale_factors = np.array(UnitScalingFactors(M_sun, R_sun))[0:5]
+    scale_array = np.zeros((num_iter,6))
+    scale_array[:, :len(scale_factors)] = scale_factors
+
     outwards_deriv = np.zeros((1,6))
     inwards_deriv = np.zeros((1,6))
+    current = initial_conditions
+    output = np.zeros((num_iter,6))
 
     for i in range(1, num_iter):
-        #RK4 receives a specific differential equation corresponding to each variable of interest. 
-        #RK4 outputs a 6x1 array with elements of: mass, radius, pressure, luminosity, 
-        #temperature, and density. Only the element corresponding to the differential equation (derivatives[n])
-        #input into RK4 has the correct updated value
-        
         if i == num_iter//2:
             if inwards:
                 inwards_deriv = derivative_calc(current, extra_params)
@@ -137,12 +134,12 @@ def ODESolver(initial_conditions, num_iter, extra_params, inwards, verbose=False
         #     return output, None, None
         
         current = update
-        current[DENSITY_UNIT_INDEX] = equation_of_state(current[PRESSURE_UNIT_INDEX], current[TEMP_UNIT_INDEX], extra_params)
+        current[DENSITY_UNIT_INDEX] = extra_params["mu_prime"] * current[PRESSURE_UNIT_INDEX] * np.power(current[TEMP_UNIT_INDEX],-1) #   eq. of state previously wrong.
         # if(np.any(np.less(current,0)) or (np.any(np.isnan(current)))):
         #     return output, None, None
         output[i,:] = current
 
-    return output, inwards_deriv, outwards_deriv
+    return output, inwards_deriv, outwards_deriv #multiply by scale-array (optional)
 
 
 if __name__ == "__main__": #                            Purpose of having this at the end?

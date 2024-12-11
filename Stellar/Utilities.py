@@ -12,7 +12,7 @@ R_sun  = 6.9634E8 # m
 L_sun = 3.8E26 # W
 mu_sun = np.float64(0.6)
 E_0_sun = 1E-29 # m^5/(kg s^3*K^4)
-kappa_0_sun = 1E-1 # m^2/kg
+kappa_0_sun = 1E3 # m^2/kg
 
 # Numerical Resolution used throughout the sim
 global_tolerance = 1E-2
@@ -43,7 +43,7 @@ def UnitScalingFactors(M_0, R_0):
     M_0 = np.float64(M_0)
     R_0 = np.float64(R_0)
     rho_0 = np.float64(M_0 / (R_0**3))
-    t_0 = np.float64(np.sqrt((R_0**3) / (G*M_0)))
+    t_0 = np.float64(np.sqrt((R_0**3) / (G * M_0)))
     P_0 = np.float64(M_0 / (R_0 * t_0**2))
     L_0 = np.float64(M_0 * R_0**2 / (t_0**3))
     T_0 = np.float64(m_p * R_0**2 / (t_0**2 * Boltzman))
@@ -64,28 +64,14 @@ def generate_extra_parameters(M_0, R_0, E_0, kappa_0, mu):
     Output:
         extra_const_params: python dictionary containing the converted constant parameters
     """
-    _,_, rho_0, P_0, L_0, T_0, t_0 = UnitScalingFactors(M_0, R_0)
+    _,_,_,_,_, T_0, t_0 = UnitScalingFactors(M_0, R_0)
     
+    mu_prime = mu * m_p * G * M_0 / (Boltzman * R_0 * T_0)
     E_0_prime = E_0 * t_0**3 * M_0 * T_0**4 * np.power(R_0,-5)
     kappa_0_prime = kappa_0 * 3 * M_0**3 / ((16*np.pi)**2 * StefanBoltz * R_0**5 * np.power(T_0,7.5) * np.power(t_0,3))
-    extra_params = {"mu": mu, "E_0_prime": E_0_prime, "kappa_0_prime": kappa_0_prime}
+    extra_params = {"mu_prime": mu_prime, "E_0_prime": E_0_prime, "kappa_0_prime": kappa_0_prime}
     
     return extra_params
-
-
-
-def equation_of_state(P_prime, T_prime, extra_params):
-    """
-        generate the density given the pressure and temperature
-        Input:
-            P_prime: dimensionless pressure (np.float64)
-            T_prime: dimensionless temp (np.float64)
-            extra_const_params: constant parameters.
-        Output:
-            rho_prime: dimensionless density  (np.float64)
-    """
-    rho_prime = (P_prime*extra_params["mu"])/T_prime
-    return rho_prime
 
 
 
