@@ -31,7 +31,7 @@ def gen_core_guess(P_core, T_core, extra_params):
     return core_conds
 
 
-def gen_outer_guess(L_outer):
+def gen_outer_guess(R_outer, L_outer):
     """
         Input:
             Helper function to deal with the fact that we can't start at m=0. We pretend that the central density is roughly constant, then fudge the boundary conditions a bit
@@ -44,7 +44,6 @@ def gen_outer_guess(L_outer):
     """
     rho_outer = global_tolerance
     M_outer = 1
-    R_outer = 1
     P_outer = global_tolerance
     T_outer = global_tolerance
     outer_conds = np.array((M_outer, R_outer, rho_outer, P_outer, L_outer, T_outer))
