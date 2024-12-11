@@ -100,20 +100,15 @@ def run_minimizer(core_guess, outer_guess, num_iters, step_size, M_0, R_0, E_0, 
     scaling_factors = UnitScalingFactors(M_0, R_0)[0:6] #               indexing should be [0:5] 
     bound_guess = np.hstack((core_guess/scaling_factors, outer_guess/scaling_factors))
 
+    #                   VERIFY CONSTRAINTS KEEP KNOWN ENDPOINTS CORRECT AND THAT THE MAGNITUDE IS CORRECT
     strict = (
-    {'type': 'ineq', 'fun': lambda x: x[0] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[1] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[2] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[3] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[4] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[5] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[6] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[7] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[8] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[9] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[10] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[11] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[:] - 1E-9}, #All elements of x must be positive
+    {'type': 'eq', 'fun': lambda x: x[0] - step_size/2}, #Core mass starts at ~ zero
     {'type': 'eq', 'fun': lambda x: x[6] - 1}, #Outer mass starts at 1
+    {'type': 'eq', 'fun': lambda x: x[1] - global_tolerance}, #Core radius starts at ~ zero
+    {'type': 'eq', 'fun': lambda x: x[4] - global_tolerance}, #Core luminosity starts at ~ zero
+    {'type': 'eq', 'fun': lambda x: x[11] - global_tolerance}, #Outer temperature starts at ~ zero.
+    {'type': 'eq', 'fun': lambda x: x[9] - global_tolerance}, #Outer pressure starts at ~ zero.
                 )
 
     return sp.optimize.minimize(smooth_merge, bound_guess,
