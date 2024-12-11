@@ -26,7 +26,7 @@ def derivative_calc(current, extra_params):
     dL_dm = extra_params["E_0_prime"] * current[DENSITY_UNIT_INDEX] * np.power(current[TEMP_UNIT_INDEX],4)
     output[LUMINOSITY_UNIT_INDEX] = dL_dm
     
-    dT_dm = - extra_params["kappa_0_prime"] * current[LUMINOSITY_UNIT_INDEX] * current[DENSITY_UNIT_INDEX] * np.power(current[RADIUS_UNIT_INDEX],-4) * np.power(current[TEMP_UNIT_INDEX],-6.5)
+    dT_dm = - extra_params["kappa_0_prime"] * np.power(current[TEMP_UNIT_INDEX],-6.5) * current[LUMINOSITY_UNIT_INDEX] * current[DENSITY_UNIT_INDEX] * np.power(current[RADIUS_UNIT_INDEX],-4)
     output[TEMP_UNIT_INDEX] = dT_dm
     
     # if np.isnan(dT_dm):
@@ -58,7 +58,7 @@ def RK4(f, current, step_size, extra_params, inwards):
     Output:
         1x6 numpy array containing Derivatives of all variables of current. Independent variable (mass) is just step size. Density is calculated outside of RK4
     """
-    assert(step_size >0)
+    assert(step_size > 0)
     step_size = np.float64(step_size)
     # half_step_size = step_size/2                    Unnecessary variable assignment.
 
@@ -127,22 +127,21 @@ def ODESolver(initial_conditions, num_iter, extra_params, inwards, verbose=False
             
         update  = RK4(derivative_calc, current, step_size, extra_params, inwards)
         
-        if np.any(np.isnan(update)):
-            if verbose:
-                print(f"Iteration {i}: NaN encountered in update, stopping integration.")
-            break
-        if np.any(np.less(current, 0)) or np.any(np.isnan(current)):
-            if verbose:
-                print(f"Invalid state encountered: {current}")
-            return output, None, None
-
+        # if np.any(np.isnan(update)):
+        #     if verbose:
+        #         print(f"Iteration {i}: NaN encountered in update, stopping integration.")
+        #     break
+        # if np.any(np.less(current, 0)) or np.any(np.isnan(current)):
+        #     if verbose:
+        #         print(f"Invalid state encountered: {current}")
+        #     return output, None, None
         
         current = update
         current[DENSITY_UNIT_INDEX] = equation_of_state(current[PRESSURE_UNIT_INDEX], current[TEMP_UNIT_INDEX], extra_params)
-        if(np.any(np.less(current,0)) or (np.any(np.isnan(current)))):
-             return output, None, None
+        # if(np.any(np.less(current,0)) or (np.any(np.isnan(current)))):
+        #     return output, None, None
         output[i,:] = current
-    #print(output)
+
     return output, inwards_deriv, outwards_deriv
 
 

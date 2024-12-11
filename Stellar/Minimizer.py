@@ -11,7 +11,7 @@ from Utilities import *
 #TEMP_UNIT_INDEX = 5 [K]
 
 
-def gen_core_conditions(P_core, T_core, step_size, extra_params):
+def gen_core_guess(P_core, T_core, extra_params):
     """
         Input:
             Helper function to deal with the fact that we can't start at m=0. We pretend that the central density is roughly constant, then fudge the boundary conditions a bit
@@ -32,7 +32,7 @@ def gen_core_conditions(P_core, T_core, step_size, extra_params):
 
 
 
-def gen_outer_conditions(L_outer):
+def gen_outer_guess(L_outer):
     """
         Input:
             Helper function to deal with the fact that we can't start at m=0. We pretend that the central density is roughly constant, then fudge the boundary conditions a bit
@@ -102,20 +102,29 @@ def run_minimizer(core_guess, outer_guess, num_iters, step_size, M_0, R_0, E_0, 
     bound_guess = np.hstack((core_guess/scaling_factors, outer_guess/scaling_factors))
 
     strict = (
-    {'type': 'ineq', 'fun': lambda x: 1E-3 - bound_guess[0]}, #Core mass
-    {'type': 'ineq', 'fun': lambda x: 1E-3 - bound_guess[1]}, #Core radius
-    {'type': 'ineq', 'fun': lambda x: 1E-3 - bound_guess[4]}, #Core luminosity
-    {'type': 'ineq', 'fun': lambda x: 1.1 - bound_guess[6]}, #Outer mass
-    {'type': 'ineq', 'fun': lambda x: bound_guess[6] - 1E-1}, #Outer mass
-    {'type': 'ineq', 'fun': lambda x: 1.1 - bound_guess[7]}, #Outer radius
-    {'type': 'ineq', 'fun': lambda x: bound_guess[7] - 1E-1}, #Outer radius
+    {'type': 'ineq', 'fun': lambda x: x[0] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[1] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[2] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[3] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[4] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[5] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[6] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[7] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[8] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[9] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[10] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[11] - 1E-9}, #All elements of x must be positive
+    {'type': 'eq', 'fun': lambda x: x[6] - 1}, #Outer mass starts at 1
+    {'type': 'eq', 'fun': lambda x: x[7] - 1} #Outer radius starts at 1
+    
                 )
 
     return sp.optimize.minimize(smooth_merge, bound_guess,
                                     args=(num_iters, extra_params, step_size), 
                                     bounds=sp.optimize.Bounds(lb = global_tolerance * np.ones(12), 
-                                    ub = np.inf * np.ones(12), keep_feasible = True * np.ones(12)), constraints = strict
-                                    )
+                                    ub = np.inf * np.ones(12), keep_feasible = True * np.ones(12)), 
+                                    constraints = strict
+                                )
     
 
 if __name__ == "__main__":
