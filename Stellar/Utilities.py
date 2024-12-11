@@ -15,7 +15,7 @@ E_0_sun = 1E-29 # m^5/(kg s^3*K^4)
 kappa_0_sun = 1E-1 # m^2/kg
 
 # Numerical Resolution used throughout the sim
-global_tolerance = 1E-2
+global_tolerance = 1E-5
 
 MASS_UNIT_INDEX = 0
 RADIUS_UNIT_INDEX = 1
