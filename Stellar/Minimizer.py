@@ -1,7 +1,7 @@
 import numpy as np
 import scipy as sp
 import Integrator
-import Utilities
+from Utilities import *
 
 #MASS_UNIT_INDEX = 0 []
 #RADIUS_UNIT_INDEX = 1 []
@@ -23,10 +23,10 @@ def gen_core_conditions(P_core, T_core, step_size, extra_params):
             1x6 numpy array containing initial conditions in scaled variables
     """
     # We need to fudge the radius initial condition to avoid the singularity at r=0 in the equations.
-    rho_core =  Utilities.equation_of_state(P_core, T_core, extra_params)
-    M_core = step_size/2
-    R_core = np.power((4*np.pi/3) * M_core / rho_core, 1/3)
-    L_core = Utilities.global_tolerance
+    rho_core = equation_of_state(P_core, T_core, extra_params)
+    M_core = 1E-2
+    R_core = 1E-2
+    L_core = 1E-2
     core_conds = np.array([M_core, R_core, rho_core, P_core, L_core, T_core])
     return core_conds
 
@@ -43,11 +43,11 @@ def gen_outer_conditions(L_outer):
         Output:
             1x6 numpy array containing initial conditions in scaled variables
     """
-    rho_outer = Utilities.global_tolerance
+    rho_outer = global_tolerance
     M_outer = 1
     R_outer = 1
-    P_outer = Utilities.global_tolerance
-    T_outer = Utilities.global_tolerance
+    P_outer = global_tolerance
+    T_outer = global_tolerance
     outer_conds = np.array((M_outer, R_outer, rho_outer, P_outer, L_outer, T_outer))
     return outer_conds
 
@@ -62,17 +62,10 @@ def smooth_merge(bound_guess, num_iter, extra_params, step_size):
         Output:
             np.float64: the loss function for the given initial pressure and temp conditions
     """
-# We assume that estimator has dimensions 2x1
-# Temperature and pressure normally can't be negative
-    P_core_guess = bound_guess[0]
-    T_core_guess = bound_guess[1]
-    L_outer_guess = bound_guess[2]
-    assert(P_core_guess >= 0) 
-    assert(T_core_guess >= 0)
-    assert(L_outer_guess >= 0)
-
-    outwards_sol,_,outwards_deriv = Integrator.ODESolver(gen_core_conditions(P_core_guess, T_core_guess, step_size, extra_params), num_iter, extra_params, False)
-    inwards_sol,inwards_deriv,_ = Integrator.ODESolver(gen_outer_conditions(L_outer_guess), num_iter, extra_params, True)
+    core_guess = np.array(bound_guess[:6])
+    outer_guess = np.array(bound_guess[6:])
+    outwards_sol,_,outwards_deriv = Integrator.ODESolver(core_guess, num_iter, extra_params, False)
+    inwards_sol,inwards_deriv,_ = Integrator.ODESolver(outer_guess, num_iter, extra_params, True)
     #
     if outwards_deriv is None:
         outwards_deriv = np.zeros((1, 6))
@@ -81,15 +74,15 @@ def smooth_merge(bound_guess, num_iter, extra_params, step_size):
     #
     deriv_diff = np.sum(np.abs(outwards_deriv - inwards_deriv))
     deriv_weight = 1
-    
     func_diff = np.sum(np.abs(outwards_sol[num_iter//2,:] - inwards_sol[num_iter//2,:]))
-    func_weight = 10
+    func_weight = 100
 
     return deriv_weight * deriv_diff**2 + func_weight * func_diff**2
 
 
 
-def run_minimizer(P_core_guess, T_core_guess, L_outer_guess, num_iters, step_size, M_0, R_0, E_0, kappa_0, mu):
+
+def run_minimizer(core_guess, outer_guess, num_iters, step_size, M_0, R_0, E_0, kappa_0, mu):
     """
         Helper function: to generate set up the minimizer and run it
             Input:
@@ -104,13 +97,25 @@ def run_minimizer(P_core_guess, T_core_guess, L_outer_guess, num_iters, step_siz
         Output:
             OptimizeResult from scipy.optimize.minimize
     """
-    bound_guess = np.array([P_core_guess, T_core_guess, L_outer_guess])
-    extra_params = Utilities.generate_extra_parameters(M_0, R_0, E_0, kappa_0, mu)
+    extra_params = generate_extra_parameters(M_0, R_0, E_0, kappa_0, mu)
+    scaling_factors = UnitScalingFactors(M_0, R_0)[0:6]
+    bound_guess = np.hstack((core_guess/scaling_factors, outer_guess/scaling_factors))
+
+    strict = (
+    {'type': 'ineq', 'fun': lambda x: 1E-3 - bound_guess[0]}, #Core mass
+    {'type': 'ineq', 'fun': lambda x: 1E-3 - bound_guess[1]}, #Core radius
+    {'type': 'ineq', 'fun': lambda x: 1E-3 - bound_guess[LUMINOSITY_UNIT_INDEX]}, #Core luminosity
+    {'type': 'ineq', 'fun': lambda x: 1.1 - bound_guess[6]}, #Outer mass
+    {'type': 'ineq', 'fun': lambda x: bound_guess[6] - 1E-1}, #Outer mass
+    {'type': 'ineq', 'fun': lambda x: 1.1 - bound_guess[7]}, #Outer radius
+    {'type': 'ineq', 'fun': lambda x: bound_guess[7] - 1E-1}, #Outer radius
+                )
 
     return sp.optimize.minimize(smooth_merge, bound_guess,
                                     args=(num_iters, extra_params, step_size), 
-                                    bounds=sp.optimize.Bounds(lb=[Utilities.global_tolerance,Utilities.global_tolerance,Utilities.global_tolerance], 
-                                    ub=[np.inf,np.inf,np.inf], keep_feasible=[True, True,True]),)
+                                    bounds=sp.optimize.Bounds(lb = global_tolerance * np.ones(12), 
+                                    ub = np.inf * np.ones(12), keep_feasible = True * np.ones(12)), constraints = strict
+                                    )
     
 
 if __name__ == "__main__":
