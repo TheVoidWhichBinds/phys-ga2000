@@ -24,9 +24,9 @@ def gen_core_conditions(P_core, T_core, step_size, extra_params):
     """
     # We need to fudge the radius initial condition to avoid the singularity at r=0 in the equations.
     rho_core = equation_of_state(P_core, T_core, extra_params)
-    M_core = 1E-2
-    R_core = 1E-2
-    L_core = 1E-2
+    M_core = global_tolerance
+    R_core = global_tolerance
+    L_core = global_tolerance
     core_conds = np.array([M_core, R_core, rho_core, P_core, L_core, T_core])
     return core_conds
 
