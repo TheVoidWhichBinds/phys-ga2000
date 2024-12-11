@@ -97,7 +97,7 @@ def run_minimizer(core_guess, outer_guess, num_iters, step_size, M_0, R_0, E_0, 
             OptimizeResult from scipy.optimize.minimize
     """
     extra_params = generate_extra_parameters(M_0, R_0, E_0, kappa_0, mu)
-    scaling_factors = UnitScalingFactors(M_0, R_0)[0:6]
+    scaling_factors = UnitScalingFactors(M_0, R_0)[0:6] #               indexing should be [0:5] 
     bound_guess = np.hstack((core_guess/scaling_factors, outer_guess/scaling_factors))
 
     strict = (
