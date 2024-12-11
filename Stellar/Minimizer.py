@@ -66,17 +66,17 @@ def smooth_merge(bound_guess, num_iter, extra_params, step_size):
     outwards_sol,_,outwards_deriv = Integrator.ODESolver(core_guess, num_iter, extra_params, False)
     inwards_sol,inwards_deriv,_ = Integrator.ODESolver(outer_guess, num_iter, extra_params, True)
     #
-    if outwards_deriv is None:
-        outwards_deriv = np.zeros((1, 6))
-    if inwards_deriv is None:
-        inwards_deriv = np.zeros((1, 6))
-    #
-    deriv_diff = np.sum(np.abs(outwards_deriv - inwards_deriv))
-    deriv_weight = 1
+    # if outwards_deriv is None:
+    #     outwards_deriv = np.zeros((1, 6))
+    # if inwards_deriv is None:
+    #     inwards_deriv = np.zeros((1, 6))
+    # #
+    # deriv_diff = np.sum(np.abs(outwards_deriv - inwards_deriv))
+    # deriv_weight = 1
     func_diff = np.sum(np.abs(outwards_sol[num_iter//2,:] - inwards_sol[num_iter//2,:]))
-    func_weight = 100
+    func_weight = 1
 
-    return deriv_weight * deriv_diff**2 + func_weight * func_diff**2
+    return func_weight * func_diff**2 #+ deriv_weight * deriv_diff**2  
 
 
 
