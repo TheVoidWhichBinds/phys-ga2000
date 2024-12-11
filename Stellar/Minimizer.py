@@ -60,10 +60,9 @@ def smooth_merge(bound_guess, num_iter, extra_params, step_size):
         Output:
             np.float64: the loss function for the given initial pressure and temp conditions
     """
-    core_guess = np.array(bound_guess[:6])
-    outer_guess = np.array(bound_guess[6:])
-    outwards_sol,_,outwards_deriv = Integrator.ODESolver(core_guess, num_iter, extra_params, False)
-    inwards_sol,inwards_deriv,_ = Integrator.ODESolver(outer_guess, num_iter, extra_params, True)
+    
+    outwards_sol,_,outwards_deriv = Integrator.ODESolver(bound_guess[:6], num_iter, extra_params, False)
+    inwards_sol,inwards_deriv,_ = Integrator.ODESolver(bound_guess[6:], num_iter, extra_params, True)
     
     
     # if outwards_deriv is None:
@@ -77,6 +76,11 @@ def smooth_merge(bound_guess, num_iter, extra_params, step_size):
     #                 FUNC_DIFF VERIFY IT'S THE CORRECT MINIMIZATION
     func_diff = np.sum(np.abs(outwards_sol[num_iter//2,:] - inwards_sol[num_iter//2,:]))
     func_weight = 1
+
+    # if not (np.all(outwards_sol >= 0) and np.all(inwards_sol >= 0)):
+    #     func_weight = 1*np.inf
+    #     return func_weight  # Return a large number if any value is not positive
+    
 
     return func_weight * func_diff**2 #+ deriv_weight * deriv_diff**2  
 
@@ -101,11 +105,11 @@ def run_minimizer(core_guess, outer_guess, num_iters, step_size, M_0, R_0, E_0, 
     extra_params = generate_extra_parameters(M_0, R_0, E_0, kappa_0, mu)
     scaling_factors = UnitScalingFactors(M_0, R_0)[0:6] #               indexing should be [0:5] 
     bound_guess = np.hstack((core_guess/scaling_factors, outer_guess/scaling_factors))
-
+    
     #                 SUSSI SECTION - FIND RELEVANCE OF -0.4 INTEGRAL CONVERGENCE
     strict = (
     {'type': 'ineq', 'fun': lambda x: x[0] - 1E-9}, #All elements of x must be positive
-    {'type': 'ineq', 'fun': lambda x: x[6] - 1E-9}, #All elements of x must be positive
+    #{'type': 'ineq', 'fun': lambda x: x[6] - 1E-9}, #All elements of x must be positive
     {'type': 'eq', 'fun': lambda x: x[0] - step_size/2}, #Core mass starts at ~ zero
     {'type': 'eq', 'fun': lambda x: x[6] - 1}, #Outer mass starts at 1
     {'type': 'eq', 'fun': lambda x: x[1] - global_tolerance}, #Core radius starts at ~ zero
@@ -118,7 +122,7 @@ def run_minimizer(core_guess, outer_guess, num_iters, step_size, M_0, R_0, E_0, 
                                     args=(num_iters, extra_params, step_size), 
                                     bounds=sp.optimize.Bounds(lb = global_tolerance * np.ones(12), 
                                     ub = np.inf * np.ones(12), keep_feasible = True * np.ones(12)), 
-                                    constraints = strict, tol = 1e-9
+                                    constraints = strict,
                                 )
     
 
