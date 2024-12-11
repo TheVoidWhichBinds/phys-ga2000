@@ -25,7 +25,7 @@ def derivative_calc(current, extra_params):
 
     dL_dm = extra_params["E_0_prime"] * current[DENSITY_UNIT_INDEX] * np.power(current[TEMP_UNIT_INDEX],4)
     output[LUMINOSITY_UNIT_INDEX] = dL_dm
-    
+
     dT_dm = - extra_params["kappa_0_prime"] * np.power(current[TEMP_UNIT_INDEX],-6.5) * current[LUMINOSITY_UNIT_INDEX] * current[DENSITY_UNIT_INDEX] * np.power(current[RADIUS_UNIT_INDEX],-4)
     output[TEMP_UNIT_INDEX] = dT_dm
     

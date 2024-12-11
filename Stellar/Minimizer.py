@@ -65,7 +65,8 @@ def smooth_merge(bound_guess, num_iter, extra_params, step_size):
     outer_guess = np.array(bound_guess[6:])
     outwards_sol,_,outwards_deriv = Integrator.ODESolver(core_guess, num_iter, extra_params, False)
     inwards_sol,inwards_deriv,_ = Integrator.ODESolver(outer_guess, num_iter, extra_params, True)
-    #
+    
+    
     # if outwards_deriv is None:
     #     outwards_deriv = np.zeros((1, 6))
     # if inwards_deriv is None:
@@ -102,20 +103,19 @@ def run_minimizer(core_guess, outer_guess, num_iters, step_size, M_0, R_0, E_0, 
 
     strict = (
     {'type': 'ineq', 'fun': lambda x: x[0] - 1E-9}, #All elements of x must be positive
-    # {'type': 'ineq', 'fun': lambda x: x[1] - 1E-9}, #All elements of x must be positive
-    # {'type': 'ineq', 'fun': lambda x: x[2] - 1E-9}, #All elements of x must be positive
-    # {'type': 'ineq', 'fun': lambda x: x[3] - 1E-9}, #All elements of x must be positive
-    # {'type': 'ineq', 'fun': lambda x: x[4] - 1E-9}, #All elements of x must be positive
-    # {'type': 'ineq', 'fun': lambda x: x[5] - 1E-9}, #All elements of x must be positive
-    # {'type': 'ineq', 'fun': lambda x: x[6] - 1E-9}, #All elements of x must be positive
-    # {'type': 'ineq', 'fun': lambda x: x[7] - 1E-9}, #All elements of x must be positive
-    # {'type': 'ineq', 'fun': lambda x: x[8] - 1E-9}, #All elements of x must be positive
-    # {'type': 'ineq', 'fun': lambda x: x[9] - 1E-9}, #All elements of x must be positive
-    # {'type': 'ineq', 'fun': lambda x: x[10] - 1E-9}, #All elements of x must be positive
-    # {'type': 'ineq', 'fun': lambda x: x[11] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[1] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[2] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[3] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[4] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[5] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[6] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[7] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[8] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[9] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[10] - 1E-9}, #All elements of x must be positive
+    {'type': 'ineq', 'fun': lambda x: x[11] - 1E-9}, #All elements of x must be positive
     {'type': 'eq', 'fun': lambda x: x[6] - 1}, #Outer mass starts at 1
     {'type': 'eq', 'fun': lambda x: x[7] - 1} #Outer radius starts at 1
-    
                 )
 
     return sp.optimize.minimize(smooth_merge, bound_guess,
